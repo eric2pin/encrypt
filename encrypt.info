@@ -1,0 +1,4 @@
+; $Id$
+name = Encrypt
+description = Provides an API for two-way encryption
+core = 6.x
