@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @defgroup encrypt Encrypt: Provides an API for two-way encryption
