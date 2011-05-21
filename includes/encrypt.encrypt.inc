@@ -8,7 +8,7 @@
  */
 
 /**
- * Implementation of encrypt_method_info().
+ * Implementation of hook_encrypt_method_info().
  */
 function encrypt_encrypt_method_info() {
   $methods = array();
@@ -113,12 +113,13 @@ function encrypt_encrypt_mcrypt_rij_256($op = 'encrypt', $text = '', $options = 
   // Define iv cipher
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
   $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+  $use_base64 = array_key_exists('base64', $options) && $options['base64'] !== FALSE;
 
   // Check op
   if ($op == 'decrypt') {
     // Decrypt
     // Check if we are using base64 encoding
-    if ($options['base64'] !== FALSE) {
+    if ($use_base64) {
       $text = base64_decode($text);
     }
 
@@ -130,7 +131,7 @@ function encrypt_encrypt_mcrypt_rij_256($op = 'encrypt', $text = '', $options = 
     $processed_text = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv);
 
     // Check if we are using base64 encoding
-    if ($options['base64'] !== FALSE) {
+    if ($use_base64) {
       $processed_text = base64_encode($processed_text);
     }
   }
