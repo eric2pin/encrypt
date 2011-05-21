@@ -148,6 +148,6 @@ function decrypt($text = '', $options = array(), $method = NULL) {
 function encrypt_encrypt_api() {
   return array(
     'file' => drupal_get_path('module', 'encrypt') . '/includes/encrypt.encrypt.inc',
-    'api' => '1.0',
+    'api version' => '1.0',
   );
 }
