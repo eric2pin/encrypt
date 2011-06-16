@@ -2,3 +2,6 @@ name = Encrypt
 description = Provides an API for two-way encryption
 core = 7.x
 configure = admin/config/system/encrypt
+
+files[] = encrypt.module
+files[] = encrypt.test

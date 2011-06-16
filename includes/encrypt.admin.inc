@@ -17,7 +17,6 @@ function encrypt_admin_settings() {
   encrypt_initialize();
 
   // Get formatted methods
-  drupal_add_css(drupal_get_path('module', 'encrypt') . '/encrypt.css');
   $methods = theme('encrypt_admin_list', encrypt_get_methods('full', TRUE));
 
   // Define Form
@@ -27,6 +26,11 @@ function encrypt_admin_settings() {
     '#description' => t('Define the default encryption method for the site.  Since encryption methods are stored with strings, this can be changed even after you have stored encrypted data.'),
     '#options' => $methods,
     '#default_value' => variable_get('encrypt_default', ENCRYPT_DEFAULT_METHOD),
+    '#attached' => array(
+      'css' => array(
+        drupal_get_path('module', 'encrypt') . '/encrypt.css',
+      ),
+    ),
   );
 
   // Make a system setting form and return
