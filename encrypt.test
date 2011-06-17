@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * @file
+ * Tests for encrypt.module
+ */
+
+/**
+ * Test basic encryption and decryption.
+ */
+class EncryptEncryptDecryptTest extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Encrypt and Decrypt a String',
+      'description' => 'Test basic encrypting and decripting of a string.',
+      'group' => 'Encrypt',
+    );
+  }
+
+  /**
+   * Enable encrypt module.
+   */
+  function setUp() {
+    parent::setUp('encrypt');
+  }
+
+  /**
+   * Test encryption and decryption with the "None" method.
+   */
+  function testNoneEncryptDecrypt() {
+    // First, generate a random string to encrypt.
+    $random = $this->randomName(10);
+
+    // Encrypt the string.
+    $encrypted = encrypt($random, array(), 'none');
+    $this->assertNotEqual($random, $encrypted, t('None: A value, encrypted, does not equal itself.'));
+    $this->assertTrue(strpos($encrypted, 'a:') === 0, t('None: The encrypted value is a serialized array.'));
+
+    // Then, decrypt the encrypted string.
+    $decrypted = decrypt($encrypted, array(), 'none');
+    $this->assertEqual($random, $decrypted, t('None: A value, decrypted, equals itself.'));
+  }
+
+  /**
+   * Test encryption and decryption with the "Basic" method.
+   *
+   * Pretty much the same as the "None" tests. See that method for more detailed comments.
+   */
+  function testBasicEncryptDecrypt() {
+    $random = $this->randomName(10);
+    $encrypted = encrypt($random, array(), 'default');
+    $this->assertNotEqual($random, $encrypted, t('Basic: A value, encrypted, does not equal itself.'));
+    $this->assertTrue(strpos($encrypted, 'a:') === 0, t('Basic: The encrypted value is a serialized array.'));
+    $decrypted = decrypt($encrypted, array(), 'default');
+    $this->assertEqual($random, $decrypted, t('Basic: A value, decrypted, equals itself.'));
+  }
+
+  /**
+   * Test encryption and decryption with the "MCrypt" method.
+   *
+   * Pretty much the same as the "None" tests. See that method for more detailed comments.
+   */
+  function testMCryptEncryptDecrypt() {
+    $random = $this->randomName(10);
+    $encrypted = encrypt($random, array(), 'mcrypt_rij_256');
+    $this->assertNotEqual($random, $encrypted, t('MCrypt: A value, encrypted, does not equal itself.'));
+    $this->assertTrue(strpos($encrypted, 'a:') === 0, t('MCrypt: The encrypted value is a serialized array.'));
+    $decrypted = decrypt($encrypted, array(), 'mcrypt_rij_256');
+    $this->assertEqual($random, $decrypted, t('MCrypt: A value, decrypted, equals itself.'));
+  }
+
+}
+
+/**
+ * Test encryption method hooks.
+ */
+class EncryptEncryptionMethodHooksTest extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Encryption Method Hook tests',
+      'description' => 'Test encryption method declaration hooks.',
+      'group' => 'Encrypt',
+    );
+  }
+
+  /**
+   * Enable encrypt module.
+   */
+  function setUp() {
+    parent::setUp('encrypt', 'encrypt_test');
+    $adminUser = $this->drupalCreateUser(array('administer encrypt'));
+    $this->drupalLogin($adminUser);
+  }
+
+  /**
+   * Ensure that our declared encryption method appears on the settings page.
+   */
+  function testMethodAppearsInList() {
+    $this->drupalGet('admin/config/system/encrypt');
+    $this->assertText('Test Method', t('Encryption method name is present.'));
+    $this->assertText('This is just a test encryption method.', t('Encryption method description is present.'));
+  }
+
+}
