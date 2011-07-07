@@ -39,7 +39,7 @@ function encrypt_encrypt_method_info() {
 }
 
 /**
- * Call back for Encrypt implementation: none
+ * Callback for Encrypt implementation: none
  */
 function encrypt_encrypt_none($op = 'encrypt', $text = '', $options = array()) {
   // Check op
@@ -54,7 +54,7 @@ function encrypt_encrypt_none($op = 'encrypt', $text = '', $options = array()) {
 }
 
 /**
- * Call back for Encrypt implementation: default
+ * Callback for Encrypt implementation: default
  *
  * This method uses a simple encryption method of character
  * replacement.
@@ -62,39 +62,31 @@ function encrypt_encrypt_none($op = 'encrypt', $text = '', $options = array()) {
 function encrypt_encrypt_basic($op = 'encrypt', $text = '', $options = array()) {
   $processed_text = '';
 
-  // Check for key
-  if (!empty($options['key'])) {
-    $key = $options['key'];
-  }
-  else {
-    $key = variable_get('drupal_private_key', 'no_key');
-  }
+  // Check for and assign key
+  $key = !empty($options['key']) ? $options['key'] : variable_get('drupal_private_key', 'no_key');
 
-  // Check op
-  if ($op == 'decrypt') {
-    // Decrypt
-    for ($i = 0; $i < drupal_strlen($text); $i++) {
-      $char = drupal_substr($text, $i, 1);
-      $keychar = drupal_substr($key, ($i % drupal_strlen($key)) - 1, 1);
+  // Caching length operations to speed up for loops.
+  $text_length = strlen($text);
+  $key_length = strlen($key);
+
+  // Loop through each character.
+  for ($i = 0; $i < $text_length; $i++) {
+    $char = substr($text, $i, 1);
+    $keychar = substr($key, ($i % $key_length) - 1, 1);
+    // Encrypt or decrypt the character.
+    if ($op == 'decrypt') {
       $char = chr(ord($char) - ord($keychar));
-      $processed_text .= $char;
-    }
-  }
-  else {
-    // Encrypt
-    for ($i = 0; $i < drupal_strlen($text); $i++) {
-      $char = drupal_substr($text, $i, 1);
-      $keychar = drupal_substr($key, ($i % drupal_strlen($key)) - 1, 1);
+    } else {
       $char = chr(ord($char) + ord($keychar));
-      $processed_text .= $char;
     }
+    $processed_text .= $char;
   }
 
   return $processed_text;
 }
 
 /**
- * Call back for Encrypt implementation: Mcrypt
+ * Callback for Encrypt implementation: Mcrypt
  *
  * This method uses a PHPs mcrypt extension and AES-256
  */
