@@ -103,6 +103,43 @@ function encrypt_initialize() {
 }
 
 /**
+ * Fetch metadata on a specific key provider plugin.
+ *
+ * @param $provider
+ *   Name of a key provider method.
+ *
+ * @return
+ *   An array with information about the requested key provider.
+ */
+function encrypt_get_key_provider($provider) {
+  ctools_include('plugins');
+  return ctools_get_plugins('encrypt', 'key_providers', $provider);
+}
+
+/**
+ * Helper function to get all encryption key providers.
+ *
+ * @return
+ *  An array of arrays with information about all available key providers.
+ */
+function encrypt_get_key_providers() {
+  ctools_include('plugins');
+  return ctools_get_plugins('encrypt', 'key_providers');
+}
+
+/**
+ * Implementation of hook_ctools_plugin_TYPE().
+ *
+ * Tell ctools about our key provider plugin type.
+ */
+function encrypt_ctools_plugin_key_providers() {
+  return array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+  );
+}
+
+/**
  * Encrypt
  *
  * Encrypt text.
