@@ -128,14 +128,16 @@ function encrypt_get_key_providers() {
 }
 
 /**
- * Implementation of hook_ctools_plugin_TYPE().
+ * Implementation of hook_ctools_plugin_type().
  *
- * Tell ctools about our key provider plugin type.
+ * Tell ctools about our plugin types.
  */
-function encrypt_ctools_plugin_key_providers() {
+function encrypt_ctools_plugin_type() {
   return array(
-    'cache' => TRUE,
-    'cache table' => 'cache',
+    'key_providers' => array(
+      'cache' => TRUE,
+      'cache table' => 'cache',
+    ),
   );
 }
 
@@ -188,3 +190,15 @@ function encrypt_encrypt_api() {
     'api version' => '1.0',
   );
 }
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ *
+ * Tell ctools about our plugins.
+ */
+function encrypt_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'encrypt') {
+    return 'plugins/' . $plugin;
+  }
+}
+
