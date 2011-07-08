@@ -81,9 +81,7 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   $processed = '';
 
   // Get the encryption key from the default key provider.
-  $key_provider = encrypt_get_key_provider();
-  $key_function = ctools_plugin_get_function($key_provider, 'key callback');
-  $key = call_user_func($key_function, $key_provider['settings']);
+  $key = encrypt_get_key_from_key_provider();
 
   // Check op
   if ($op !== 'encrypt') {

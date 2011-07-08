@@ -24,11 +24,25 @@ function encrypt_get_file_key($settings) {
  */
 function encrypt_file_key_settings_form() {
   $form = array();
+  $defaults = variable_get('encrypt_key_provider_file_settings', array(
+    'path' => '',
+  ));
 
   $form['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to Key File'),
+    '#default_value' => $defaults['path'],
+    /*'#element_validate' => array('encrypt_file_key_path_validate'),*/
   );
 
   return $form;
+}
+
+/**
+ * Validate key path.
+ */
+function encrypt_file_key_path_validate($element, &$form_state, $form) {
+  if (!file_exists($element['#value'])) {
+    form_error($element, t('The directory %dir does not exist.', array('%dir' => $element['#value'])));
+  }
 }

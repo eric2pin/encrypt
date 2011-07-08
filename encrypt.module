@@ -131,6 +131,26 @@ function encrypt_get_key_providers() {
 }
 
 /**
+ * Get the key from a key provider.
+ *
+ * @param $provider
+ *  The key provider to retrieve the key for. Can be either the fully-loaded provider 
+ *  (from encrypt_get_key_provider() or the name of the provider. If NULL, it assumes 
+ *  the default key provider.
+ *
+ * @return string
+ *  The key.
+ */
+function encrypt_get_key_from_key_provider($provider = NULL) {
+  if (!is_array($provider)) {
+    $provider = encrypt_get_key_provider($provider);
+  }
+  $key_function = ctools_plugin_get_function($provider, 'key callback');
+  $key = call_user_func($key_function, $provider['settings']);
+  return $key;
+}
+
+/**
  * Implementation of hook_ctools_plugin_type().
  *
  * Tell ctools about our plugin types.
@@ -141,6 +161,12 @@ function encrypt_ctools_plugin_type() {
       'cache' => TRUE,
       'cache table' => 'cache',
       'process' => 'encrypt_key_providers_get_settings',
+      'defaults' => array(
+        'title' => '',
+        'description' => '',
+        'key callback' => NULL,
+        'settings form' => NULL,
+      ),
     ),
   );
 }
