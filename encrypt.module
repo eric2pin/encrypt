@@ -106,12 +106,15 @@ function encrypt_initialize() {
  * Fetch metadata on a specific key provider plugin.
  *
  * @param $provider
- *   Name of a key provider method.
+ *   Name of a key provider method. If no $provider is specified, this function will return info
+ *   about the default key provider.
  *
  * @return
  *   An array with information about the requested key provider.
  */
-function encrypt_get_key_provider($provider) {
+function encrypt_get_key_provider($provider = NULL) {
+  // If no $provider is passed, get the default provider.
+  $provider = $provider ? $provider : variable_get('encrypt_key_provider', 'drupal_private_key');
   ctools_include('plugins');
   return ctools_get_plugins('encrypt', 'key_providers', $provider);
 }
@@ -137,8 +140,16 @@ function encrypt_ctools_plugin_type() {
     'key_providers' => array(
       'cache' => TRUE,
       'cache table' => 'cache',
+      'process' => 'encrypt_key_providers_get_settings',
     ),
   );
+}
+
+/**
+ * Attach any settings necessary to a key provider.
+ */
+function encrypt_key_providers_get_settings(&$plugin, $info) {
+  $plugin['settings'] = variable_get('encrypt_key_provider_' . $plugin['name'] . '_settings', array());
 }
 
 /**

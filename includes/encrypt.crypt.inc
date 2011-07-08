@@ -80,6 +80,11 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   $encryption_array = array();
   $processed = '';
 
+  // Get the encryption key from the default key provider.
+  $key_provider = encrypt_get_key_provider();
+  $key_function = ctools_plugin_get_function($key_provider, 'key callback');
+  $key = call_user_func($key_function, $key_provider['settings']);
+
   // Check op
   if ($op !== 'encrypt') {
     $op = 'decrypt';
@@ -104,7 +109,7 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   }
 
   // Call callback function for encryption and decryption.
-  $processed = call_user_func($methods[$method]['callback'], $op, $text, $options);
+  $processed = call_user_func($methods[$method]['callback'], $op, $text, $key, $options);
 
   // Check for returned value
   if (!empty($processed) && $op == 'encrypt') {

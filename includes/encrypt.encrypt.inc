@@ -41,7 +41,8 @@ function encrypt_encrypt_method_info() {
 /**
  * Callback for Encrypt implementation: none
  */
-function encrypt_encrypt_none($op = 'encrypt', $text = '', $options = array()) {
+function encrypt_encrypt_none($op = 'encrypt', $text = '', $key, $options = array()) {
+  krumo($key);
   // Check op
   if ($op == 'decrypt') {
     // No encryption
@@ -59,11 +60,8 @@ function encrypt_encrypt_none($op = 'encrypt', $text = '', $options = array()) {
  * This method uses a simple encryption method of character
  * replacement.
  */
-function encrypt_encrypt_basic($op = 'encrypt', $text = '', $options = array()) {
+function encrypt_encrypt_basic($op = 'encrypt', $text = '', $key, $options = array()) {
   $processed_text = '';
-
-  // Check for and assign key
-  $key = !empty($options['key']) ? $options['key'] : variable_get('drupal_private_key', 'no_key');
 
   // Caching length operations to speed up for loops.
   $text_length = strlen($text);
@@ -90,17 +88,8 @@ function encrypt_encrypt_basic($op = 'encrypt', $text = '', $options = array()) 
  *
  * This method uses a PHPs mcrypt extension and AES-256
  */
-function encrypt_encrypt_mcrypt_rij_256($op = 'encrypt', $text = '', $options = array()) {
+function encrypt_encrypt_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
   $processed_text = '';
-
-  // Check for key
-  if (!empty($options['key'])) {
-    $key = $options['key'];
-  }
-  else {
-    // Key cannot be too long for this encryption
-    $key = drupal_substr(variable_get('drupal_private_key', 'no_key'), 0, 32);
-  }
 
   // Define iv cipher
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);

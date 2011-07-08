@@ -3,7 +3,8 @@
 $plugin = array(
   'title' => t('Drupal Private Key'),
   'description' => t('Use Drupal\'s private key from the database.'),
-  'callback' => 'encrypt_get_drupal_private_key',
+  'key callback' => 'encrypt_get_drupal_private_key',
+  'settings form' => NULL,
 );
 
 /**
