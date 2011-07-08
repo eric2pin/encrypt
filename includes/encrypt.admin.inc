@@ -13,19 +13,18 @@
  * @see system_settings_form()
  */
 function encrypt_admin_settings($form, &$form_state) {
-  // Initialize to just see if any funny business is going on
-  encrypt_initialize();
+  $form = array();
 
   // Get formatted methods
-  $methods = theme('encrypt_admin_list', encrypt_get_methods('full', TRUE));
+  $methods = encrypt_get_encryption_methods();
 
   // Define Form
-  $form['encrypt_default'] = array(
+  $form['encrypt_encryption_method'] = array(
     '#type' => 'radios',
     '#title' => t('Default Encrypt Method'),
     '#description' => t('Define the default encryption method for the site. Since encryption methods are stored with the data, this can be changed even after you have stored encrypted data.'),
-    '#options' => $methods,
-    '#default_value' => variable_get('encrypt_default', ENCRYPT_DEFAULT_METHOD),
+    '#options' => theme('encrypt_admin_list', $methods),
+    '#default_value' => variable_get('encrypt_encryption_method', ENCRYPT_DEFAULT_METHOD),
     '#attached' => array(
       'css' => array(
         drupal_get_path('module', 'encrypt') . '/encrypt.css',
@@ -35,10 +34,6 @@ function encrypt_admin_settings($form, &$form_state) {
 
   // Get all key providers and format them for a a form.
   $providers = encrypt_get_key_providers();
-  $provider_options = array();
-  foreach ($providers as $name => $provider) {
-    $provider_options[$name] = $provider['title'];
-  }
   $provider = variable_get('encrypt_key_provider', 'drupal_private_key');
 
   $form['encrypt_key_provider'] = array(
@@ -46,7 +41,7 @@ function encrypt_admin_settings($form, &$form_state) {
     '#title' => t('Key Provider'),
     // TODO: Warning about changing this value.
     '#description' => t('Select the method by which encrypt will retrieve an encryption key.'),
-    '#options' => $provider_options,
+    '#options' => theme('encrypt_admin_list', $providers),
     '#default_value' => $provider,
     '#ajax' => array(
       'method' => 'replace',

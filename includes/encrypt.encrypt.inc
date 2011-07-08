@@ -2,120 +2,108 @@
 
 /**
  * @file
- * This file holds the hook implementation for the encrypt modules
+ * This file holds the ffunctions necessary to encrypt and decrypt
  *
  * @ingroup encrypt
  */
 
 /**
- * Implementation of hook_encrypt_method_info().
+ * Private Encrypt and Decrypt
+ *
+ * Private internal function to Encrypt and Decrypt text.
+ *
+ * @param $op
+ *   Whether to encrypt or decrypt.
+ *   - "encrypt": Encrypt text
+ *   - "decrypt": Decrypt text
+ * @param $text
+ *   Text to encrypt
+ * @param $options
+ *   Array of options for encryption
+ * @param $method
+ *   String name of method to use.  Uses setting
+ *   default if NULL
+ * @return
+ *   Encrypted text
  */
-function encrypt_encrypt_method_info() {
-  $methods = array();
-  $default_method = (string) ENCRYPT_DEFAULT_METHOD;
+function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $method = NULL) {
+  $encryption_array = array();
+  $processed = '';
 
-  // Basic methods that dont need any extensions
-  $methods[$default_method] = array(
-    'title' => t('Basic'),
-    'description' => t('This is the basic default encryption type that does not require any special extensions.'),
-    'callback' => 'encrypt_encrypt_basic',
-  );
-  $methods['none'] = array(
-    'title' => t('None'),
-    'description' => t('This uses no encryption.  It is not suggested to use this.'),
-    'callback' => 'encrypt_encrypt_none',
-  );
+  // Get the encryption key from the default key provider.
+  $key = encrypt_get_key_from_key_provider();
 
-  // Mcrypt method
-  if (function_exists('mcrypt_get_iv_size') && function_exists('mcrypt_create_iv') && function_exists('mcrypt_encrypt')) {
-    $methods['mcrypt_rij_256'] = array(
-      'title' => t('Mcrypt AES 256'),
-      'description' => t('This uses PHPs mcrypt extension and <a href="!url">AES-256</a>.', array('!url' => 'http://en.wikipedia.org/wiki/Advanced_Encryption_Standard')),
-      'callback' => 'encrypt_encrypt_mcrypt_rij_256',
+  // Check op
+  if ($op !== 'encrypt') {
+    $op = 'decrypt';
+  }
+
+  // If decrypting we need to get method
+  if ($op == 'decrypt') {
+    $encryption_array = unserialize($text);
+    $method = $encryption_array['method'];
+    $text = $encryption_array['text'];
+  }
+
+  // Check text
+  if ($text === '') {
+    return $processed;
+  }
+
+  // Check method
+  $method = encrypt_check_method($method);
+  if ($method === FALSE) {
+    return $processed;
+  }
+
+  // Call callback function for encryption and decryption.
+  $encryption_method = encrypt_get_encryption_method($method);
+  $encryption_function = ctools_plugin_get_function($encryption_method, 'encrypt callback');
+  $processed = call_user_func($encryption_function, $op, $text, $key, $options);
+
+  // Check for returned value
+  if (!empty($processed) && $op == 'encrypt') {
+    $encryption_array = array(
+      'text' => $processed,
+      'method' => $method,
     );
+    // Serialize array
+    $processed = serialize($encryption_array);
   }
 
-  return $methods;
+  return $processed;
 }
 
 /**
- * Callback for Encrypt implementation: none
- */
-function encrypt_encrypt_none($op = 'encrypt', $text = '', $key, $options = array()) {
-  krumo($key);
-  // Check op
-  if ($op == 'decrypt') {
-    // No encryption
-    return $text;
-  }
-  else {
-    // No encryption
-    return $text;
-  }
-}
-
-/**
- * Callback for Encrypt implementation: default
+ * Check Method
  *
- * This method uses a simple encryption method of character
- * replacement.
- */
-function encrypt_encrypt_basic($op = 'encrypt', $text = '', $key, $options = array()) {
-  $processed_text = '';
-
-  // Caching length operations to speed up for loops.
-  $text_length = strlen($text);
-  $key_length = strlen($key);
-
-  // Loop through each character.
-  for ($i = 0; $i < $text_length; $i++) {
-    $char = substr($text, $i, 1);
-    $keychar = substr($key, ($i % $key_length) - 1, 1);
-    // Encrypt or decrypt the character.
-    if ($op == 'decrypt') {
-      $char = chr(ord($char) - ord($keychar));
-    } else {
-      $char = chr(ord($char) + ord($keychar));
-    }
-    $processed_text .= $char;
-  }
-
-  return $processed_text;
-}
-
-/**
- * Callback for Encrypt implementation: Mcrypt
+ * Check if a method is valid for encryption
  *
- * This method uses a PHPs mcrypt extension and AES-256
+ * @param $method
+ *   Method to check for
+ * @return
+ *   Method name or FALSE
  */
-function encrypt_encrypt_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
-  $processed_text = '';
+function encrypt_check_method($method = NULL) {
+  $methods = encrypt_get_methods('full');
+  $method = (string) $method;
 
-  // Define iv cipher
-  $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
-  $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-  $use_base64 = array_key_exists('base64', $options) && $options['base64'] !== FALSE;
-
-  // Check op
-  if ($op == 'decrypt') {
-    // Decrypt
-    // Check if we are using base64 encoding
-    if ($use_base64) {
-      $text = base64_decode($text);
-    }
-
-    // Decrypt text
-    $processed_text = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv);
-  }
-  else {
-    // Encrypt
-    $processed_text = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv);
-
-    // Check if we are using base64 encoding
-    if ($use_base64) {
-      $processed_text = base64_encode($processed_text);
-    }
+  // Determine method
+  if ($method == NULL) {
+    $method = variable_get('encrypt_default', ENCRYPT_DEFAULT_METHOD);
   }
 
-  return trim($processed_text);
+  // Make sure its a valid method
+  if (!is_array($methods[$method])) {
+    watchdog('encrypt', 'Encrypt call with invalid method: %method', array('%method' => $method));
+    return FALSE;
+  }
+
+  // Make sure theres a valid callback
+  if (empty($methods[$method]['callback']) || !function_exists($methods[$method]['callback'])) {
+    watchdog('encrypt', 'Encrypt function call is not valid: %function , for method: %method', array('%method' => $method, '%function' => $methods[$method]['callback']));
+    return FALSE;
+  }
+
+  return $method;
 }

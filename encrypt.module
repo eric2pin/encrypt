@@ -85,21 +85,64 @@ function encrypt_permission() {
 }
 
 /**
- * Initilize Encrypt
+ * Implementation of hook_ctools_plugin_type().
  *
- * Get necessary includes.
+ * Tell ctools about our plugin types.
  */
-function encrypt_initialize() {
-  module_load_include('inc', 'encrypt', 'includes/encrypt.crypt');
+function encrypt_ctools_plugin_type() {
+  $plugins = array();
 
-  // Include any files that modules want to include
-  // TODO: Some sort of version checking
-  foreach (module_implements('encrypt_api') as $module) {
-    $info = module_invoke($module, 'encrypt_api');
-    if (is_array($info) && !empty($info['file'])) {
-      require_once $info['file'];
-    }
-  }
+  $plugins['encryption_methods'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'encrypt callback' => NULL,
+      'settings form' => NULL,
+    ),
+  );
+  $plugins['key_providers'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => 'encrypt_key_providers_get_settings',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'key callback' => NULL,
+      'settings form' => NULL,
+    ),
+  );
+
+  return $plugins;
+}
+
+/**
+ * Fetch metadata on a specific encryption method plugin.
+ *
+ * @param $method
+ *   Name of an encryption method. If no $method is specified, this function will return info
+ *   about the default encryption method.
+ *
+ * @return
+ *   An array with information about the requested encryption method.
+ */
+function encrypt_get_encryption_method($method = NULL) {
+  // If no $method is passed, get the default method.
+  $method = $method ? $method : variable_get('encrypt_encryption_method', 'default');
+  ctools_include('plugins');
+  return ctools_get_plugins('encrypt', 'encryption_methods', $method);
+}
+
+/**
+ * Helper function to get all encryption methods.
+ *
+ * @return
+ *  An array of arrays with information about all available encryption methods.
+ */
+function encrypt_get_encryption_methods() {
+  ctools_include('plugins');
+  return ctools_get_plugins('encrypt', 'encryption_methods');
 }
 
 /**
@@ -151,27 +194,6 @@ function encrypt_get_key_from_key_provider($provider = NULL) {
 }
 
 /**
- * Implementation of hook_ctools_plugin_type().
- *
- * Tell ctools about our plugin types.
- */
-function encrypt_ctools_plugin_type() {
-  return array(
-    'key_providers' => array(
-      'cache' => TRUE,
-      'cache table' => 'cache',
-      'process' => 'encrypt_key_providers_get_settings',
-      'defaults' => array(
-        'title' => '',
-        'description' => '',
-        'key callback' => NULL,
-        'settings form' => NULL,
-      ),
-    ),
-  );
-}
-
-/**
  * Attach any settings necessary to a key provider.
  */
 function encrypt_key_providers_get_settings(&$plugin, $info) {
@@ -194,7 +216,7 @@ function encrypt_key_providers_get_settings(&$plugin, $info) {
  *   A serialized array containing the encrypted text and encryption method.
  */
 function encrypt($text = '', $options = array(), $method = NULL) {
-  encrypt_initialize();
+  module_load_include('inc', 'encrypt', 'includes/encrypt.encrypt');
   return _encrypt_decrypt('encrypt', $text, $options, $method);
 }
 
@@ -214,18 +236,8 @@ function encrypt($text = '', $options = array(), $method = NULL) {
  *   Decrypted text
  */
 function decrypt($text = '', $options = array(), $method = NULL) {
-  encrypt_initialize();
+  module_load_include('inc', 'encrypt', 'includes/encrypt.encrypt');
   return _encrypt_decrypt('decrypt', $text, $options, $method);
-}
-
-/**
- * Implementation of hook_encrypt_api().
- */
-function encrypt_encrypt_api() {
-  return array(
-    'file' => drupal_get_path('module', 'encrypt') . '/includes/encrypt.encrypt.inc',
-    'api version' => '1.0',
-  );
 }
 
 /**

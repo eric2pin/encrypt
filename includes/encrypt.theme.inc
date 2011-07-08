@@ -12,26 +12,26 @@
  *
  * This function themes the list of methods for the admin view.
  *
- * @param $methods
+ * @param $items
  *   Array of methods
  * @return
  *   Array of similar put themed titles
  */
-function theme_encrypt_admin_list($methods = array()) {
+function theme_encrypt_admin_list($items = array()) {
   $output = array();
 
   // Check methods
-  if (!is_array($methods)) {
+  if (!is_array($items)) {
     return $output;
   }
 
   // Go through methods
-  foreach ($methods as $name => $method) {
+  foreach ($items as $name => $item) {
     $output[$name] = '
       <span class="encrypt-admin-list-item">
-        <span class="encrypt-admin-list-item-label">' . $method['title'] . '</span> -
+        <span class="encrypt-admin-list-item-label">' . $item['title'] . '</span> -
         <span class="encrypt-admin-list-item-description">
-        ' . $method['description'] . '
+        ' . $item['description'] . '
         </span>
       </span>
     ';
