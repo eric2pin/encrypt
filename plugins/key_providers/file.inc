@@ -32,7 +32,8 @@ function encrypt_file_key_settings_form() {
     '#type' => 'textfield',
     '#title' => t('Path to Key File'),
     '#default_value' => $defaults['path'],
-    /*'#element_validate' => array('encrypt_file_key_path_validate'),*/
+    // '#element_validate' => array('encrypt_file_key_path_validate'),
+    '#required' => TRUE,
   );
 
   return $form;

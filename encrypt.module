@@ -20,11 +20,6 @@
  */
 
 /**
- * Encrypt Default name
- */
-define('ENCRYPT_DEFAULT_METHOD', 'default');
-
-/**
  * Implementation of hook_help().
  */
 function encrypt_help($path, $arg) {
@@ -99,6 +94,7 @@ function encrypt_ctools_plugin_type() {
       'title' => '',
       'description' => '',
       'encrypt callback' => NULL,
+      'dependencies' => NULL,
       'settings form' => NULL,
     ),
   );
@@ -137,12 +133,27 @@ function encrypt_get_encryption_method($method = NULL) {
 /**
  * Helper function to get all encryption methods.
  *
+ * @param $check_dependencies
+ *  Some encryption methods have dependencies. If this is TRUE, this function will only return
+ *  encryption methods whose dependencies are present.
+ *
  * @return
  *  An array of arrays with information about all available encryption methods.
  */
-function encrypt_get_encryption_methods() {
+function encrypt_get_encryption_methods($check_dependencies = TRUE) {
   ctools_include('plugins');
-  return ctools_get_plugins('encrypt', 'encryption_methods');
+  $plugins = ctools_get_plugins('encrypt', 'encryption_methods');
+  if (!$check_dependencies) {
+    return $plugins;
+  } else {
+    foreach ($plugins as $id => $plugin) {
+      $dependencies_callback = ctools_plugin_get_function($plugin, 'dependencies');
+      if ($dependencies_callback && !call_user_func($dependencies_callback)) {
+        unset($plugins[$id]);
+      }
+    }
+    return $plugins;
+  }
 }
 
 /**

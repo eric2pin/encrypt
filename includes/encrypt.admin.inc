@@ -15,12 +15,7 @@
 function encrypt_admin_settings($form, &$form_state) {
   $form = array();
 
-  /*$enc = encrypt('Drupal 7');*/
-  /*krumo($enc);*/
-  /*$dec = decrypt($enc);*/
-  /*krumo($dec);*/
-
-  // Get formatted methods
+  // Get method plugins.
   $methods = encrypt_get_encryption_methods();
 
   // Define Form
@@ -29,7 +24,7 @@ function encrypt_admin_settings($form, &$form_state) {
     '#title' => t('Default Encrypt Method'),
     '#description' => t('Define the default encryption method for the site. Since encryption methods are stored with the data, this can be changed even after you have stored encrypted data.'),
     '#options' => theme('encrypt_admin_list', $methods),
-    '#default_value' => variable_get('encrypt_encryption_method', ENCRYPT_DEFAULT_METHOD),
+    '#default_value' => variable_get('encrypt_encryption_method', 'default'),
     '#attached' => array(
       'css' => array(
         drupal_get_path('module', 'encrypt') . '/encrypt.css',

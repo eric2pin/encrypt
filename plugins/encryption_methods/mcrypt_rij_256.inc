@@ -4,6 +4,7 @@ $plugin = array(
   'title' => t('Mcrypt AES 256'),
   'description' => t('This uses PHPs mcrypt extension and <a href="!url">AES-256</a>.', array('!url' => 'http://en.wikipedia.org/wiki/Advanced_Encryption_Standard')),
   'encrypt callback' => 'encrypt_encryption_methods_mcrypt_rij_256',
+  'dependencies' => 'mcrypt_extension_is_present',
 );
 
 /**
@@ -41,4 +42,11 @@ function encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', 
   }
 
   return trim($processed_text);
+}
+
+/**
+ * Callback to see if the MCrypt library is present.
+ */
+function mcrypt_extension_is_present() {
+  return function_exists('mcrypt_encrypt');
 }
