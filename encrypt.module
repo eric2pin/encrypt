@@ -90,22 +90,26 @@ function encrypt_ctools_plugin_type() {
   $plugins['encryption_methods'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
+    'process' => '_encrypt_plugin_process',
     'defaults' => array(
       'title' => '',
       'description' => '',
       'encrypt callback' => NULL,
       'dependencies' => NULL,
+      'dependency errors' => NULL,
       'settings form' => NULL,
     ),
   );
   $plugins['key_providers'] = array(
     'cache' => TRUE,
     'cache table' => 'cache',
-    'process' => 'encrypt_key_providers_get_settings',
+    'process' => '_encrypt_plugin_process',
     'defaults' => array(
       'title' => '',
       'description' => '',
       'key callback' => NULL,
+      'dependencies' => NULL,
+      'dependency errors' => NULL,
       'settings form' => NULL,
     ),
   );
@@ -133,27 +137,12 @@ function encrypt_get_encryption_method($method = NULL) {
 /**
  * Helper function to get all encryption methods.
  *
- * @param $check_dependencies
- *  Some encryption methods have dependencies. If this is TRUE, this function will only return
- *  encryption methods whose dependencies are present.
- *
  * @return
  *  An array of arrays with information about all available encryption methods.
  */
-function encrypt_get_encryption_methods($check_dependencies = TRUE) {
+function encrypt_get_encryption_methods() {
   ctools_include('plugins');
-  $plugins = ctools_get_plugins('encrypt', 'encryption_methods');
-  if (!$check_dependencies) {
-    return $plugins;
-  } else {
-    foreach ($plugins as $id => $plugin) {
-      $dependencies_callback = ctools_plugin_get_function($plugin, 'dependencies');
-      if ($dependencies_callback && !call_user_func($dependencies_callback)) {
-        unset($plugins[$id]);
-      }
-    }
-    return $plugins;
-  }
+  return ctools_get_plugins('encrypt', 'encryption_methods');
 }
 
 /**
@@ -205,10 +194,16 @@ function encrypt_get_key_from_key_provider($provider = NULL) {
 }
 
 /**
- * Attach any settings necessary to a key provider.
+ * Additional processing for plugins.
  */
-function encrypt_key_providers_get_settings(&$plugin, $info) {
-  $plugin['settings'] = variable_get('encrypt_key_provider_' . $plugin['name'] . '_settings', array());
+function _encrypt_plugin_process(&$plugin, $info) {
+  // Attach the plugins settings.
+  $plugin['settings'] = variable_get("encrypt_{$plugin['plugin type']}_{$plugin['name']}_settings", array());
+
+  // Calculate dependencies and attach any errors.
+  if ($plugin['dependencies'] && $dep_function = ctools_plugin_get_function($plugin, 'dependencies')) {
+    $plugin['dependency errors'] = call_user_func($dep_function);
+  }
 }
 
 /**

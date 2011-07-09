@@ -24,7 +24,7 @@ function encrypt_get_file_key($settings) {
  */
 function encrypt_file_key_settings_form() {
   $form = array();
-  $defaults = variable_get('encrypt_key_provider_file_settings', array(
+  $defaults = variable_get('encrypt_key_providers_file_settings', array(
     'path' => '',
   ));
 

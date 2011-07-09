@@ -14,9 +14,25 @@
  */
 function encrypt_admin_settings($form, &$form_state) {
   $form = array();
+  $form['#attached'] = array(
+    'css' => array(
+      drupal_get_path('module', 'encrypt') . '/encrypt.css',
+    ),
+  );
 
   // Get method plugins.
   $methods = encrypt_get_encryption_methods();
+  /**
+   * TODO:
+   * For now, we'll just filter out methods with dependency errors.
+   * Once (http://drupal.org/node/104715) is committed, we can do something cooler with the errors.
+   */
+  foreach ($methods as $id => $method) {
+    if (!empty($method['dependency errors'])) {
+      unset($methods[$id]);
+    }
+  }
+
 
   // Define Form
   $form['encrypt_encryption_method'] = array(
@@ -25,11 +41,6 @@ function encrypt_admin_settings($form, &$form_state) {
     '#description' => t('Define the default encryption method for the site. Since encryption methods are stored with the data, this can be changed even after you have stored encrypted data.'),
     '#options' => theme('encrypt_admin_list', $methods),
     '#default_value' => variable_get('encrypt_encryption_method', 'default'),
-    '#attached' => array(
-      'css' => array(
-        drupal_get_path('module', 'encrypt') . '/encrypt.css',
-      ),
-    ),
   );
 
   // Get all key providers and format them for a a form.
@@ -69,7 +80,7 @@ function encrypt_admin_settings($form, &$form_state) {
       '#type' => 'fieldset',
       '#title' => t('Additional Key Provider Settings'),
     );
-    $form['key_settings_wrapper']['key_settings']['encrypt_key_provider_' . $provider . '_settings'] = array('#tree' => TRUE) + call_user_func($settings_form_method);
+    $form['key_settings_wrapper']['key_settings']['encrypt_key_providers_' . $provider . '_settings'] = array('#tree' => TRUE) + call_user_func($settings_form_method);
   }
 
   // Make a system setting form and return

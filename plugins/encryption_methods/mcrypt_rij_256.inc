@@ -3,8 +3,8 @@
 $plugin = array(
   'title' => t('Mcrypt AES 256'),
   'description' => t('This uses PHPs mcrypt extension and <a href="!url">AES-256</a>.', array('!url' => 'http://en.wikipedia.org/wiki/Advanced_Encryption_Standard')),
-  'encrypt callback' => 'encrypt_encryption_methods_mcrypt_rij_256',
-  'dependencies' => 'mcrypt_extension_is_present',
+  'encrypt callback' => '_encrypt_encryption_methods_mcrypt_rij_256',
+  'dependencies' => '_mcrypt_extension_is_present',
 );
 
 /**
@@ -12,7 +12,7 @@ $plugin = array(
  *
  * This method uses a PHPs mcrypt extension and AES-256
  */
-function encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
+function _encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
   $processed_text = '';
 
   // Define iv cipher
@@ -47,6 +47,12 @@ function encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', 
 /**
  * Callback to see if the MCrypt library is present.
  */
-function mcrypt_extension_is_present() {
-  return function_exists('mcrypt_encrypt');
+function _mcrypt_extension_is_present() {
+  $errors = array();
+
+  if (!function_exists('mcrypt_encrypt')) {
+    $errors[] = t('MCrypt library not installed.');
+  }
+
+  return $errors;
 }
