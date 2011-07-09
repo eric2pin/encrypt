@@ -15,6 +15,11 @@
 function encrypt_admin_settings($form, &$form_state) {
   $form = array();
 
+  /*$enc = encrypt('Drupal 7');*/
+  /*krumo($enc);*/
+  /*$dec = decrypt($enc);*/
+  /*krumo($dec);*/
+
   // Get formatted methods
   $methods = encrypt_get_encryption_methods();
 

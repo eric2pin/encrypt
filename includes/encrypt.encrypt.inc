@@ -45,21 +45,20 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
     $text = $encryption_array['text'];
   }
 
+  // If there is no method, assume we will be using the default.
+  if (!$method) {
+    $method = variable_get('encrypt_encryption_method', 'default');
+  }
+
   // Check text
   if ($text === '') {
     return $processed;
   }
 
-  // Check method
-  $method = encrypt_check_method($method);
-  if ($method === FALSE) {
-    return $processed;
-  }
-
   // Call callback function for encryption and decryption.
   $encryption_method = encrypt_get_encryption_method($method);
-  $encryption_function = ctools_plugin_get_function($encryption_method, 'encrypt callback');
-  $processed = call_user_func($encryption_function, $op, $text, $key, $options);
+  $function = ctools_plugin_get_function($encryption_method, 'encrypt callback');
+  $processed = call_user_func($function, $op, $text, $key, $options);
 
   // Check for returned value
   if (!empty($processed) && $op == 'encrypt') {
@@ -72,38 +71,4 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   }
 
   return $processed;
-}
-
-/**
- * Check Method
- *
- * Check if a method is valid for encryption
- *
- * @param $method
- *   Method to check for
- * @return
- *   Method name or FALSE
- */
-function encrypt_check_method($method = NULL) {
-  $methods = encrypt_get_methods('full');
-  $method = (string) $method;
-
-  // Determine method
-  if ($method == NULL) {
-    $method = variable_get('encrypt_default', ENCRYPT_DEFAULT_METHOD);
-  }
-
-  // Make sure its a valid method
-  if (!is_array($methods[$method])) {
-    watchdog('encrypt', 'Encrypt call with invalid method: %method', array('%method' => $method));
-    return FALSE;
-  }
-
-  // Make sure theres a valid callback
-  if (empty($methods[$method]['callback']) || !function_exists($methods[$method]['callback'])) {
-    watchdog('encrypt', 'Encrypt function call is not valid: %function , for method: %method', array('%method' => $method, '%function' => $methods[$method]['callback']));
-    return FALSE;
-  }
-
-  return $method;
 }

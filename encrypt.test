@@ -31,18 +31,22 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
   function testNoneEncryptDecrypt() {
     // First, generate a random string to encrypt.
     $random = $this->randomName(10);
+    debug($random);
 
     // Encrypt the string.
     $encrypted = encrypt($random, array(), 'none');
+    debug($encrypted);
     $this->assertNotEqual($random, $encrypted, t('None: A value, encrypted, does not equal itself.'));
     $this->assertTrue(strpos($encrypted, 'a:') === 0, t('None: The encrypted value is a serialized array.'));
 
     // Since no actual encryption is being performed, ensure that the "encrypted" text is the same as the original.
     $encryptedArray = unserialize($encrypted);
     $this->assertEqual($random, $encryptedArray['text'], t('None: Initial value equals "encrypted" value.')); 
+    $this->assertEqual($encryptedArray['method'], 'none', t('None: Encryption method stored correctly.'));
 
     // Then, decrypt the encrypted string.
     $decrypted = decrypt($encrypted, array(), 'none');
+    debug($decrypted);
     $this->assertEqual($random, $decrypted, t('None: A value, decrypted, equals itself.'));
   }
 
@@ -59,6 +63,7 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
     $this->assertTrue(strpos($encrypted, 'a:') === 0, t('Basic: The encrypted value is a serialized array.'));
     $encryptedArray = unserialize($encrypted);
     $this->assertNotEqual($random, $encryptedArray['text'], t('Basic: A value, encrypted, does not equal itself.'));
+    $this->assertEqual($encryptedArray['method'], 'default', t('Basic: Encryption method stored correctly.'));
 
     $decrypted = decrypt($encrypted, array(), 'default');
     $this->assertEqual($random, $decrypted, t('Basic: A value, decrypted, equals itself.'));
@@ -78,6 +83,7 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
       $this->assertTrue(strpos($encrypted, 'a:') === 0, t('MCrypt: The encrypted value is a serialized array.'));
       $encryptedArray = unserialize($encrypted);
       $this->assertNotEqual($random, $encryptedArray['text'], t('MCrypt: A value, encrypted, does not equal itself.'));
+      $this->assertEqual($encryptedArray['method'], 'mcrypt_rij_256', t('MCrypt: Encryption method stored correctly.'));
 
       $decrypted = decrypt($encrypted, array(), 'mcrypt_rij_256');
       $this->assertEqual($random, $decrypted, t('MCrypt: A value, decrypted, equals itself.'));
@@ -95,8 +101,8 @@ class EncryptEncryptionMethodHooksTest extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array(
-      'name' => 'Encryption Method Hook tests',
-      'description' => 'Test encryption method declaration hooks.',
+      'name' => 'Encryption Method and Key Providers Plugin tests',
+      'description' => 'Test encryption method and key provider implementation.',
       'group' => 'Encrypt',
     );
   }
@@ -117,6 +123,8 @@ class EncryptEncryptionMethodHooksTest extends DrupalWebTestCase {
     $this->drupalGet('admin/config/system/encrypt');
     $this->assertText('Test Method', t('Encryption method name is present.'));
     $this->assertText('This is just a test encryption method.', t('Encryption method description is present.'));
+    $this->assertText('Test Key Provider', t('Key provider name is present.'));
+    $this->assertText('This is just a test key provider.', t('Key provider description is present.'));
   }
 
 }

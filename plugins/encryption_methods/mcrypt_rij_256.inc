@@ -3,7 +3,7 @@
 $plugin = array(
   'title' => t('Mcrypt AES 256'),
   'description' => t('This uses PHPs mcrypt extension and <a href="!url">AES-256</a>.', array('!url' => 'http://en.wikipedia.org/wiki/Advanced_Encryption_Standard')),
-  'callback' => 'encrypt_encryptions_methods_mcrypt_rij_256',
+  'encrypt callback' => 'encrypt_encryption_methods_mcrypt_rij_256',
 );
 
 /**
@@ -11,7 +11,7 @@ $plugin = array(
  *
  * This method uses a PHPs mcrypt extension and AES-256
  */
-function encrypt_encrypt_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
+function encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
   $processed_text = '';
 
   // Define iv cipher
