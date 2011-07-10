@@ -33,7 +33,6 @@ function encrypt_admin_settings($form, &$form_state) {
     }
   }
 
-
   // Define Form
   $form['encrypt_encryption_method'] = array(
     '#type' => 'radios',
@@ -80,7 +79,9 @@ function encrypt_admin_settings($form, &$form_state) {
       '#type' => 'fieldset',
       '#title' => t('Additional Key Provider Settings'),
     );
-    $form['key_settings_wrapper']['key_settings']['encrypt_key_providers_' . $provider . '_settings'] = array('#tree' => TRUE) + call_user_func($settings_form_method);
+    $settings_variable = 'encrypt_key_providers_' . $provider . '_settings';
+    $defaults = variable_get($settings_variable, array());
+    $form['key_settings_wrapper']['key_settings'][$settings_variable] = array('#tree' => TRUE) + call_user_func($settings_form_method, $defaults);
   }
 
   // Make a system setting form and return

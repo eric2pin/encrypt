@@ -11,29 +11,41 @@ $plugin = array(
  * Callback method to return the encryption key from a file.
  */
 function encrypt_get_file_key($settings) {
-  if (file_exists($settings['path'])) {
-    return file_get_contents($settings['path']);
-  } else {
+  // If the file doesn't exist, just abort.
+  if (!file_exists($settings['path'])) {
     drupal_set_message(t('The directory %dir does not exist! Encrypt cannot retrieve encryption key.', array('%dir' => $settings['path'])), 'error');
     return;
+  }
+
+  switch ($settings['method']) {
+    case 'file_contents':
+      return file_get_contents($settings['path']);
+    case 'md5':
+      return md5_file($settings['path']);
   }
 }
 
 /**
  * Settings form for our key provider.
  */
-function encrypt_file_key_settings_form() {
+function encrypt_file_key_settings_form($defaults) {
   $form = array();
-  $defaults = variable_get('encrypt_key_providers_file_settings', array(
-    'path' => '',
-  ));
 
   $form['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to Key File'),
-    '#default_value' => $defaults['path'],
+    '#default_value' => isset($defaults['path']) ? $defaults['path'] : '',
     // '#element_validate' => array('encrypt_file_key_path_validate'),
     '#required' => TRUE,
+  );
+  $form['method'] = array(
+    '#type' => 'select',
+    '#title' => t('Method'),
+    '#options' => array(
+      'file_contents' => t('File Contents'),
+      'md5' => t('MD5'),
+    ),
+    '#default_value' => isset($defaults['method']) ? $defaults['method'] : 'file_contents',
   );
 
   return $form;
