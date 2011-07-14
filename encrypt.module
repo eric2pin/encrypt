@@ -55,20 +55,6 @@ function encrypt_menu() {
 }
 
 /**
- * Implementation of hook_theme().
- */
-function encrypt_theme($existing, $type, $theme, $path) {
-  return array(
-    'encrypt_admin_list' => array(
-      'arguments' => array(
-        'methods' => array(),
-      ),
-      'file' => 'includes/encrypt.theme.inc',
-    ),
-  );
-}
-
-/**
  * Implementation of hook_permission().
  */
 function encrypt_permission() {

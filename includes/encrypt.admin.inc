@@ -22,24 +22,28 @@ function encrypt_admin_settings($form, &$form_state) {
 
   // Get method plugins.
   $methods = encrypt_get_encryption_methods();
+  $method_options = array();
+  foreach ($methods as $id => $method) {
+    $method_options[$id] = $method['title'];
+  }
 
   // Define Form
   $form['encrypt_encryption_method'] = array(
     '#type' => 'radios',
     '#title' => t('Default Encrypt Method'),
     '#description' => t('Define the default encryption method for the site. Since encryption methods are stored with the data, this can be changed even after you have stored encrypted data.'),
-    '#options' => theme('encrypt_admin_list', $methods),
+    '#options' => $method_options,
     '#default_value' => variable_get('encrypt_encryption_method', 'default'),
   );
   // Disable any method with dependency errors.
-  foreach ($methods as $id => $method) {
-    if (!empty($method['dependency errors'])) {
-      $form['encrypt_encryption_method'][$id] = array('#disabled' => TRUE);
-    }
-  }
+  _encrypt_admin_form_add_options($methods, $form['encrypt_encryption_method']);
 
   // Get all key providers and format them for a a form.
   $providers = encrypt_get_key_providers();
+  $provider_options = array();
+  foreach ($providers as $id => $provider) {
+    $provider_options[$id] = $provider['title'];
+  }
   $provider = variable_get('encrypt_key_provider', 'drupal_private_key');
 
   $form['encrypt_key_provider'] = array(
@@ -47,7 +51,7 @@ function encrypt_admin_settings($form, &$form_state) {
     '#title' => t('Key Provider'),
     // TODO: Warning about changing this value.
     '#description' => t('Select the method by which encrypt will retrieve an encryption key.'),
-    '#options' => theme('encrypt_admin_list', $providers),
+    '#options' => $provider_options,
     '#default_value' => $provider,
     '#ajax' => array(
       'method' => 'replace',
@@ -55,12 +59,15 @@ function encrypt_admin_settings($form, &$form_state) {
       'wrapper' => 'encrypt-key-providers-additional-settings',
     ),
   );
+  // Disable any method with dependency errors.
+  _encrypt_admin_form_add_options($providers, $form['encrypt_key_provider']);
 
   $form['key_settings_wrapper'] = array(
     '#type' => 'container',
     '#prefix' => '<div id="encrypt-key-providers-additional-settings">',
     '#suffix' => '</div>',
   );
+
   /** 
    * This is sort of tricky.
    * If the user has changed the key provider in the form, render the additional settings for that provider.
@@ -89,4 +96,25 @@ function encrypt_admin_settings($form, &$form_state) {
  */
 function encrypt_key_providers_additional_settings_ajax($form, $form_state) {
   return $form['key_settings_wrapper'];
+}
+
+/**
+ * Add other elements to forms.
+ */
+function _encrypt_admin_form_add_options($items, &$element) {
+  foreach ($items as $id => $item) {
+    $element[$id] = array(
+      '#description' => $item['description'],
+      '#disabled' => !empty($item['dependency errors']),
+    );
+
+    // TODO: This doesn't work.
+    // Add a list of dependency errors (if there are any).
+    if (!empty($item['dependency errors'])) {
+      $element[$id]['errors'] = array(
+        '#theme' => 'item_list',
+        '#items' => $item['dependency errors'],
+      );
+    }
+  }
 }

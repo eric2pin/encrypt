@@ -11,5 +11,5 @@ $plugin = array(
  * Callback method to return Drupal's private key.
  */
 function encrypt_get_drupal_private_key() {
-  return variable_get('drupal_private_key', '');
+  return drupal_get_private_key();
 }
