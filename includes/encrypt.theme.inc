@@ -20,12 +20,12 @@
 function theme_encrypt_admin_list($items = array()) {
   $output = array();
 
-  // Check methods
+  // Check for array
   if (!is_array($items)) {
     return $output;
   }
 
-  // Go through methods
+  // Go through items
   foreach ($items as $name => $item) {
     $output[$name] = '
       <span class="encrypt-admin-list-item">
@@ -35,6 +35,13 @@ function theme_encrypt_admin_list($items = array()) {
         </span>
       </span>
     ';
+
+    // TODO: Make this use theme_item_list.
+    if (!empty($item['dependency errors'])) {
+      $output[$name] .= '<div class="dependency-errors"><ul><li>';
+      $output[$name] .= implode('</li><li>', $item['dependency errors']);
+      $output[$name] .= '</li></ul></div>';
+    }
   }
 
   return $output;

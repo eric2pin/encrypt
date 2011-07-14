@@ -22,16 +22,6 @@ function encrypt_admin_settings($form, &$form_state) {
 
   // Get method plugins.
   $methods = encrypt_get_encryption_methods();
-  /**
-   * TODO:
-   * For now, we'll just filter out methods with dependency errors.
-   * Once (http://drupal.org/node/104715) is committed, we can do something cooler with the errors.
-   */
-  foreach ($methods as $id => $method) {
-    if (!empty($method['dependency errors'])) {
-      unset($methods[$id]);
-    }
-  }
 
   // Define Form
   $form['encrypt_encryption_method'] = array(
@@ -41,6 +31,12 @@ function encrypt_admin_settings($form, &$form_state) {
     '#options' => theme('encrypt_admin_list', $methods),
     '#default_value' => variable_get('encrypt_encryption_method', 'default'),
   );
+  // Disable any method with dependency errors.
+  foreach ($methods as $id => $method) {
+    if (!empty($method['dependency errors'])) {
+      $form['encrypt_encryption_method'][$id] = array('#disabled' => TRUE);
+    }
+  }
 
   // Get all key providers and format them for a a form.
   $providers = encrypt_get_key_providers();

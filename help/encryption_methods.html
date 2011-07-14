@@ -36,7 +36,21 @@ The plugin can just be declared in the global space; no need to wrap it in a fun
 <dt>encrypt callback</dt>
 <dd><strong>Required</strong>. This is the name of a function that you define in your plugin file. Encrypt will use this function to encrypt and decrypt text for your encryption method.</dd>
 <dt>dependencies</dt>
-<dd>Optional. The name of a function in your plugin file that declares whether or not an encryption method's dependencies have been met. The function should return TRUE if the dependencies are met, and FALSE if they are not.</dd>
+<dd>Optional. The name of a function in your plugin file that declares whether or not an encryption method's dependencies have been met. The function should return an array of error messages (if there are any) or an empty array or FALSE if all dependencies are met. For example:</dd>
+<dd><pre>
+/**
+ * Callback to see if the MCrypt library is present.
+ */
+function _mcrypt_extension_is_present() {
+  $errors = array();
+
+  if (!function_exists('mcrypt_encrypt')) {
+    $errors[] = t('MCrypt library not installed.');
+  }
+
+  return $errors;
+}
+</pre></dd>
 </li>
 
 <li>
