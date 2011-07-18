@@ -49,8 +49,7 @@ function encrypt_admin_settings($form, &$form_state) {
   $form['encrypt_key_provider'] = array(
     '#type' => 'radios',
     '#title' => t('Key Provider'),
-    // TODO: Warning about changing this value.
-    '#description' => t('Select the method by which encrypt will retrieve an encryption key.'),
+    '#description' => t('Select the method by which encrypt will retrieve an encryption key. NOTE: Once this is set, it is not a good idea to change it. All of your encrypted data may be lost if the encryption key changes.'),
     '#options' => $provider_options,
     '#default_value' => $provider,
     '#ajax' => array(
