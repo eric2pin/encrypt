@@ -16,3 +16,15 @@ function encrypt_uninstall() {
     variable_del($var);
   }
 }
+
+/**
+ * Our default encryption method variable has changed.
+ * So get the old one and save it as the new one.
+ */
+function encrypt_update_7200() {
+  $default_method = variable_get('encrypt_default_method', NULL);
+  if ($default_method) {
+    variable_set('encrypt_encryption_method', $default_method);
+    variable_del('encrypt_default_method');
+  }
+}
