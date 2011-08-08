@@ -15,6 +15,9 @@ $plugin = array(
 function _encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
   $processed_text = '';
 
+  // Key cannot be too long for this encryption
+  $key = drupal_substr($key, 0, 32);
+
   // Define iv cipher
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
   $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);

@@ -29,10 +29,15 @@ function encryptfapi_form_alter(&$form, &$form_state, $form_id) {
  * This is where we replace values with the encrypted counterparts.
  */
 function _encryptfapi_form_submit($form, &$form_state) {
-  foreach ($form['#encrypted_elements'] as $element) {
+  foreach ($form['#encrypted_elements'] as $element => $instructions) {
+    // The the element's location in the form array, then get its value.
     $tree = _encryptfapi_get_array_key_path($form, $element);
     $value = drupal_array_get_nested_value($form_state['values'], $tree, $key_exists);
-    form_set_value(array('#parents' => $tree), encrypt($value), $form_state);
+
+    // If #encrypt is an array, use the 'method' provided to encrypt. Otherwise, just use the default.
+    $encrypted = is_array($instructions) ? encrypt($value, array(), $instructions['method']) : encrypt($value);
+
+    form_set_value(array('#parents' => $tree), $encrypted, $form_state);
   }
 }
 
@@ -66,7 +71,7 @@ function _encryptfapi_process_elements($form, &$encrypted_elements = array()) {
 
   foreach (element_children($form) as $element) {
     if (isset($form[$element]['#type']) && in_array($form[$element]['#type'], $accepted_types) && isset($form[$element]['#encrypt']) && $form[$element]['#encrypt']) {
-      $encrypted_elements[] = $element;
+      $encrypted_elements[$element] = $form[$element]['#encrypt'];
     } elseif (is_array($form[$element])) {
       _encryptfapi_process_elements($form[$element], $encrypted_elements);
     }
@@ -110,7 +115,7 @@ function _encryptfapi_get_array_key_path($array, $lookup) {
  * Helper function to return the types of FAPI elements that can be encrypted.
  */
 function _encryptfapi_get_accepted_element_types() {
-  return array('textfield', 'textarea', 'checkboxes', 'checkbox', 'radios', 'radio', 'password');
+  return array('textfield', 'textarea', 'checkboxes', 'checkbox', 'radios', 'radio', 'select', 'password');
 }
 
 /**

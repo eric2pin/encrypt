@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Tests for encrypt.module
+ */
+
+/**
+ * Test basic encryption and decryption.
+ */
+class EncryptFAPITest extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Encrypt Form API Test',
+      'description' => 'Test the #encrypt Form API property',
+      'group' => 'Encrypt',
+    );
+  }
+
+  /**
+   * Enable encryptfapi and encryptfapi_test modules.
+   */
+  function setUp() {
+    parent::setUp('encryptfapi', 'encryptfapi_test');
+  }
+
+  /**
+   * Tests #encrypt property for the simple case of #encrypt => TRUE.
+   */
+  public function testEncryptionTextfield() {
+    $this->drupalGet('encryptfapi_test');
+
+    $data = array(
+      'encryptfapi_textfield_simple' => $this->randomName(10),
+      'encryptfapi_textfield_complex' => $this->randomName(10),
+    );
+    $this->drupalPost('encryptfapi_test', $data, 'Submit');
+
+    // First, test the simple one.
+    $this->assertFieldByName('encryptfapi_textfield_simple', $data['encryptfapi_textfield_simple'], t('The value appears unencrypted in the textfield.'));
+    $encrypted_value = variable_get('encryptfapi_textfield_simple', 'A Test Value');
+    $this->assertNotEqual($data['encryptfapi_textfield_simple'], $encrypted_value, t('The value stored does not equal the value shown.'));
+    $this->assertEqual($data['encryptfapi_textfield_simple'], decrypt($encrypted_value), t('The stored value, when decrypted, equals the displayed/original value.'));
+
+    // Then, the complex one.
+    $this->assertFieldByName('encryptfapi_textfield_complex', $data['encryptfapi_textfield_complex'], t('The value appears unencrypted in the textfield.'));
+    $encrypted_value = variable_get('encryptfapi_textfield_complex', 'A Test Value');
+    $unserialized = unserialize($encrypted_value);
+    $this->assertNotEqual($data['encryptfapi_textfield_complex'], $encrypted_value, t('The value stored does not equal the value shown.'));
+    $this->assertEqual($data['encryptfapi_textfield_complex'], decrypt($encrypted_value), t('The stored value, when decrypted, equals the displayed/original value.'));
+    $this->assertEqual('mcrypt_rij_256', $unserialized['method'], t('The correct encryption method was used.'));
+
+  }
+
+}
