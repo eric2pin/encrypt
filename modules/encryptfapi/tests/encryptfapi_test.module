@@ -44,21 +44,17 @@ function encryptfapi_test_form() {
     ),
   );
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
+  $default = variable_get('encrypt_tree', array());
+  $form['encrypt_tree'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+  );
+  $form['encrypt_tree']['encryptfapi_textfield_nested'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Nested Textfield'),
+    '#default_value' => isset($default['encryptfapi_textfield_nested']) ? $default['encryptfapi_textfield_nested'] : '',
+    '#encrypt' => TRUE,
   );
 
-  return $form;
-}
-
-/**
- * Submit callback.
- */
-function encryptfapi_test_form_submit($form, &$form_state) {
-  foreach ($form_state['values'] as $key => $value) {
-    if (strpos($key, 'encryptfapi_') === 0) {
-      variable_set($key, $value);
-    } 
-  }
+  return system_settings_form($form);
 }
