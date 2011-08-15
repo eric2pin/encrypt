@@ -207,9 +207,9 @@ function _encrypt_plugin_process(&$plugin, $info) {
  * @return
  *   A serialized array containing the encrypted text and encryption method.
  */
-function encrypt($text = '', $options = array(), $method = NULL) {
+function encrypt($text = '', $options = array(), $method = NULL, $key_provider = NULL) {
   module_load_include('inc', 'encrypt', 'includes/encrypt.encrypt');
-  return _encrypt_decrypt('encrypt', $text, $options, $method);
+  return _encrypt_decrypt('encrypt', $text, $options, $method, $key_provider);
 }
 
 /**
@@ -227,9 +227,9 @@ function encrypt($text = '', $options = array(), $method = NULL) {
  * @return
  *   Decrypted text
  */
-function decrypt($text = '', $options = array(), $method = NULL) {
+function decrypt($text = '', $options = array(), $method = NULL, $key_provider = NULL) {
   module_load_include('inc', 'encrypt', 'includes/encrypt.encrypt');
-  return _encrypt_decrypt('decrypt', $text, $options, $method);
+  return _encrypt_decrypt('decrypt', $text, $options, $method, $key_provider);
 }
 
 /**
