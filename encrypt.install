@@ -22,9 +22,22 @@ function encrypt_uninstall() {
  * So get the old one and save it as the new one.
  */
 function encrypt_update_7200() {
-  $default_method = variable_get('encrypt_default_method', NULL);
-  if ($default_method) {
+  if ($default_method = variable_get('encrypt_default_method', NULL)) {
     variable_set('encrypt_encryption_method', $default_method);
     variable_del('encrypt_default_method');
+  }
+}
+
+/**
+ * Provide a nice upgrade for 1.x users by copying their key path.
+ */
+function encrypt_update_7201() {
+  if ($key_path = variable_get('encrypt_secure_key_path', NULL)) {
+    variable_set('encrypt_key_provider', 'file');
+    variable_set('encrypt_key_providers_file_settings', array(
+      'path' => $key_path,
+      'method' => 'file_contents',
+    ));
+    variable_del('encrypt_secure_key_path');
   }
 }
