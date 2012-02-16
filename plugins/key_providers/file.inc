@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Plugin definition for the File key provider.
+ */
+
 $plugin = array(
   'title' => t('File'),
   'description' => t('Use a file to store the encryption key.'),
@@ -35,7 +40,7 @@ function encrypt_file_key_settings_form($defaults) {
     '#type' => 'textfield',
     '#title' => t('Path to Key File'),
     '#default_value' => isset($defaults['path']) ? $defaults['path'] : '',
-    // '#element_validate' => array('encrypt_file_key_path_validate'),
+    '#element_validate' => array('encrypt_file_key_path_validate'),
     '#required' => TRUE,
   );
   $form['method'] = array(

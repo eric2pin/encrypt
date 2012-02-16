@@ -19,6 +19,6 @@
   font-size: .80em;
 }
 
-.encrypt-admin-list-item .dependency-errors {
+ul.encrypt-dependency-errors {
   color: red;
 }

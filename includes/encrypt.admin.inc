@@ -13,6 +13,16 @@
  * @see system_settings_form()
  */
 function encrypt_admin_settings($form, &$form_state) {
+  // Retrieve all methods and providers.
+  $methods = encrypt_get_encryption_methods();
+  $providers = encrypt_get_key_providers();
+
+  // Make sure all plugin files are included (for form validation, etc.)
+  // @todo: There has to be a better/faster/cleaner way to do this.
+  foreach ($providers as $provider) {
+    $form_state['build_info']['files']["encrypt:plugins:{$provider['name']}"] = $provider['path'] . '/' . $provider['file'];
+  }
+
   $form = array();
   $form['#attached'] = array(
     'css' => array(
@@ -21,13 +31,12 @@ function encrypt_admin_settings($form, &$form_state) {
   );
 
   // Get method plugins.
-  $methods = encrypt_get_encryption_methods();
   $method_options = array();
   foreach ($methods as $id => $method) {
     $method_options[$id] = $method['title'];
   }
 
-  // Define Form
+  // Define form.
   $form['encrypt_encryption_method'] = array(
     '#type' => 'radios',
     '#title' => t('Default Encrypt Method'),
@@ -39,7 +48,6 @@ function encrypt_admin_settings($form, &$form_state) {
   _encrypt_admin_form_add_options($methods, $form['encrypt_encryption_method']);
 
   // Get all key providers and format them for a a form.
-  $providers = encrypt_get_key_providers();
   $provider_options = array();
   foreach ($providers as $id => $provider) {
     $provider_options[$id] = $provider['title'];
@@ -67,16 +75,14 @@ function encrypt_admin_settings($form, &$form_state) {
     '#suffix' => '</div>',
   );
 
-  /** 
-   * This is sort of tricky.
-   * If the user has changed the key provider in the form, render the additional settings for that provider.
-   * Otherwise, render for the current provider.
-   */
+  // This is sort of tricky.
+  // If the user has changed the key provider in the form, render the
+  // additional settings for that provider. Otherwise, render for the current
+  // provider.
   if (isset($form_state['values']['encrypt_key_provider']) && $form_state['values']['encrypt_key_provider'] !== $provider) {
     $provider = $form_state['values']['encrypt_key_provider'];
   }
-  $settings_form_method = ctools_plugin_get_function($providers[$provider], 'settings form');
-  if ($settings_form_method) {
+  if ($settings_form_method = ctools_plugin_get_function($providers[$provider], 'settings form')) {
     $form['key_settings_wrapper']['key_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Additional Key Provider Settings'),
@@ -86,7 +92,7 @@ function encrypt_admin_settings($form, &$form_state) {
     $form['key_settings_wrapper']['key_settings'][$settings_variable] = array('#tree' => TRUE) + call_user_func($settings_form_method, $defaults);
   }
 
-  // Make a system setting form and return
+  // Make a system setting form and return.
   return system_settings_form($form);
 }
 
@@ -107,13 +113,12 @@ function _encrypt_admin_form_add_options($items, &$element) {
       '#disabled' => !empty($item['dependency errors']),
     );
 
-    // TODO: This doesn't work.
     // Add a list of dependency errors (if there are any).
     if (!empty($item['dependency errors'])) {
-      $element[$id]['errors'] = array(
-        '#theme' => 'item_list',
-        '#items' => $item['dependency errors'],
-      );
+      $element[$id]['#description'] .= theme('item_list', array(
+        'items' => $item['dependency errors'],
+        'attributes' => array('class' => 'encrypt-dependency-errors')
+      ));
     }
   }
 }

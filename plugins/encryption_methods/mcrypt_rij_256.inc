@@ -57,5 +57,6 @@ function _mcrypt_extension_is_present() {
     $errors[] = t('MCrypt library not installed.');
   }
 
+  $errors[] = 'Testing';
   return $errors;
 }

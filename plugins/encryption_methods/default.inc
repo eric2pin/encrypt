@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Plugin definition for the Default encryption method.
+ */
+
 $plugin = array(
   'title' => t('Basic'),
   'description' => t('This is the basic default encryption type that does not require any special extensions.'),
@@ -12,7 +17,7 @@ $plugin = array(
  * This method uses a simple encryption method of character
  * replacement.
  */
-function encrypt_encryption_methods_basic($op = 'encrypt', $text = '', $key, $options = array()) {
+function encrypt_encryption_methods_basic($op = 'encrypt', $text = '', $key = '', $options = array()) {
   $processed_text = '';
 
   // Caching length operations to speed up for loops.
@@ -26,7 +31,8 @@ function encrypt_encryption_methods_basic($op = 'encrypt', $text = '', $key, $op
     // Encrypt or decrypt the character.
     if ($op == 'decrypt') {
       $char = chr(ord($char) - ord($keychar));
-    } else {
+    }
+    else {
       $char = chr(ord($char) + ord($keychar));
     }
     $processed_text .= $char;
@@ -34,4 +40,3 @@ function encrypt_encryption_methods_basic($op = 'encrypt', $text = '', $key, $op
 
   return $processed_text;
 }
-

@@ -12,42 +12,48 @@
  *
  * Private internal function to Encrypt and Decrypt text.
  *
- * @param $op
+ * @param string $op
  *   Whether to encrypt or decrypt.
  *   - "encrypt": Encrypt text
  *   - "decrypt": Decrypt text
- * @param $text
+ *
+ * @param string $text
  *   Text to encrypt
- * @param $options
+ *
+ * @param array $options
  *   Array of options for encryption
- * @param $method
+ *
+ * @param mixed $method
  *   String name of method to use.  Uses setting
  *   default if NULL
- * @param $key_provider
+ *
+ * @param mixed $key_provider
  *   The key provider used to fetch the encryption key. Uses default if NULL.
- * @return
- *   Encrypted text
+ *
+ * @return string
+ *   Depends on the value of $op
+ *   - "encrypt": A serialized array representing the encrypted text, method,
+ *     and key provider.
+ *   - "decrypt": The decrypted text.
  */
 function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $method = NULL, $key_provider = NULL) {
   $encryption_array = array();
   $processed = '';
 
-  // Check text
+  // Check text.
   if ($text === '') {
     return $processed;
   }
 
-  // Check op
+  // Check op.
   if ($op !== 'encrypt') {
     $op = 'decrypt';
   }
 
-  /**
-   * If decrypting we need to split the encryption array up.
-   *
-   * We need to do some ternary stuff in here to account for when the user passes
-   * in all paramters to the decrypt() function instead of just a serialized array.
-   */
+  // If decrypting we need to split the encryption array up.
+  // We need to do some ternary stuff in here to account for when the user
+  // passes in all paramters to the decrypt() function instead of just a
+  // serialized array.
   if ($op == 'decrypt') {
     // The text may not actually be serialized, so suppress the warning.
     $encryption_array = @unserialize($text);
@@ -74,14 +80,14 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   $function = ctools_plugin_get_function($encryption_method, 'encrypt callback');
   $processed = call_user_func($function, $op, $text, $key, $options);
 
-  // Check for returned value
+  // Check for returned value.
   if (!empty($processed) && $op == 'encrypt') {
     $encryption_array = array(
       'text' => $processed,
       'method' => $method,
       'key_provider' => $key_provider,
     );
-    // Serialize array
+    // Serialize array.
     $processed = serialize($encryption_array);
   }
 
