@@ -23,6 +23,61 @@ function encrypt_uninstall() {
 }
 
 /**
+ * Implements hook_requirements().
+ */
+function encrypt_requirements($phase) {
+  $requirements = array();
+
+  switch ($phase) {
+    case 'runtime':
+      $method = encrypt_get_encryption_method();
+      $key_provider = encrypt_get_key_provider();
+      $dependency_errors = '';
+
+      // Check the plugins for dependency errors.
+      if (isset($method['dependency errors']) && !empty($method['dependency errors'])) {
+        $dependency_errors .= theme('item_list', array('items' => $method['dependency errors']));
+      }
+      if (isset($key_provider['dependency errors']) && !empty($key_provider['dependency errors'])) {
+        $dependency_errors .= theme('item_list', array('items' => $key_provider['dependency errors']));
+      }
+
+      if (isset($dependency_errors) && !empty($dependency_errors)) {
+        $requirements['encrypt_dependencies'] = array(
+          'title' => t('Encrypt Dependencies'),
+          'value' => t('Unmet dependencies'),
+          'description' => $dependency_errors,
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+
+      // Set a warning about the Drupal Private Key method. 
+      $issues = array();
+      if ($key_provider['name'] == 'drupal_private_key') {
+        $issues['description'] = t(
+          'The site is using the private key stored in the database to encrypt
+          data. While this provides some level of obfuscation, it is highly
+          recommended to store the encryption key outside of the database.
+          See the !link for more information.', array(
+            '!link' => l('Encrypt module page', 'http://drupal.org/project/encrypt'),
+          )
+        );
+        $issues['severity'] = REQUIREMENT_WARNING;
+        $issues['value'] = t('Security concerns');
+      }
+      $requirements['encrypt_secure'] = $issues + array(
+        'title' => t('Encryption Security'),
+        'value' => t('Secure'),
+        'severity' => REQUIREMENT_OK,
+      );
+
+      break;
+  }
+
+  return $requirements;  
+}
+
+/**
  * Our default encryption method variable has changed.
  * So get the old one and save it as the new one.
  */

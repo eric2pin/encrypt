@@ -4,7 +4,7 @@ $plugin = array(
   'title' => t('PHP Secure Communications Library (phpseclib)'),
   'description' => t('Uses the !link library. This method is only preferable if you cannot install mcrypt.', array('!link' => l('phpseclib', 'http://phpseclib.sourceforge.net/'))),
   'encrypt callback' => '_encrypt_encryption_methods_phpseclib',
-  'dependencies' => '_encrypt_phpseclib_dependencies',
+  'dependency callback' => '_encrypt_phpseclib_dependencies',
 );
 
 /**

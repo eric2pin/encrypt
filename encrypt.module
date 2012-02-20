@@ -81,7 +81,7 @@ function encrypt_ctools_plugin_type() {
       'title' => '',
       'description' => '',
       'encrypt callback' => NULL,
-      'dependencies' => NULL,
+      'dependency callback' => NULL,
       'dependency errors' => NULL,
       'settings form' => NULL,
     ),
@@ -94,7 +94,7 @@ function encrypt_ctools_plugin_type() {
       'title' => '',
       'description' => '',
       'key callback' => NULL,
-      'dependencies' => NULL,
+      'dependency callback' => NULL,
       'dependency errors' => NULL,
       'settings form' => NULL,
     ),
@@ -160,6 +160,24 @@ function encrypt_get_key_providers() {
 }
 
 /**
+ * Gets a list of key providers with met dependencies.
+ *
+ * @return array
+ *   An array of key provider plugins whose dependencies have been met.
+ */
+function encrypt_get_valid_key_providers() {
+  $providers = encrypt_get_key_providers();
+
+  foreach ($providers as &$provider) {
+    if (isset($provider['dependency errors']) && !empty($provider['dependency errors'])) {
+      unset($provider);
+    }
+  }
+
+  return $providers;
+}
+
+/**
  * Get the key from a key provider.
  *
  * @param mixed $provider
@@ -187,7 +205,7 @@ function _encrypt_plugin_process(&$plugin, $info) {
   $plugin['settings'] = variable_get("encrypt_{$plugin['plugin type']}_{$plugin['name']}_settings", array());
 
   // Calculate dependencies and attach any errors.
-  if ($plugin['dependencies'] && $dep_function = ctools_plugin_get_function($plugin, 'dependencies')) {
+  if ($plugin['dependency callback'] && $dep_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
     $plugin['dependency errors'] = call_user_func($dep_function);
   }
 }
