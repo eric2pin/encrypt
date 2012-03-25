@@ -18,7 +18,7 @@ $plugin = array(
 function encrypt_get_file_key($settings) {
   // If the file doesn't exist, just abort.
   if (!file_exists($settings['path'])) {
-    drupal_set_message(t('The directory %dir does not exist! Encrypt cannot retrieve encryption key.', array('%dir' => $settings['path'])), 'error');
+    drupal_set_message(t('The file %dir does not exist! Encrypt cannot retrieve encryption key.', array('%dir' => $settings['path'])), 'error');
     return;
   }
 
@@ -39,6 +39,10 @@ function encrypt_file_key_settings_form($defaults) {
   $form['path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to Key File'),
+    '#description' => t('Filepath may be absolute (e.g. %abs) or relative to the Drupal directory (e.g. %rel).', array(
+      '%abs' => '/var/www',
+      '%rel' => '../../keys',
+    )),
     '#default_value' => isset($defaults['path']) ? $defaults['path'] : '',
     '#element_validate' => array('encrypt_file_key_path_validate'),
     '#required' => TRUE,
@@ -61,6 +65,6 @@ function encrypt_file_key_settings_form($defaults) {
  */
 function encrypt_file_key_path_validate($element, &$form_state, $form) {
   if (!file_exists($element['#value'])) {
-    form_error($element, t('The directory %dir does not exist.', array('%dir' => $element['#value'])));
+    form_error($element, t('The file %dir does not exist.', array('%dir' => $element['#value'])));
   }
 }

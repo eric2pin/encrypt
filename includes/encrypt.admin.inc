@@ -13,6 +13,11 @@
  * @see system_settings_form()
  */
 function encrypt_admin_settings($form, &$form_state) {
+  // Clear the plugin cache on the first page load (but not on AJAX refreshes).
+  if (!isset($form_state['values'])) {
+    _encrypt_clear_plugin_cache();
+  }
+
   // Retrieve all methods and providers.
   $methods = encrypt_get_encryption_methods();
   $providers = encrypt_get_key_providers();

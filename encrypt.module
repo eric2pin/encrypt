@@ -121,15 +121,24 @@ function encrypt_get_encryption_method($method = NULL) {
 }
 
 /**
- * Helper function to get all encryption methods.
+ * Returns information for all encryption methods.
  *
  * @param boolean $all
  *   A flag indicating whether to include plugins with unmet dependencies.
  *
+ * @param boolean $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, this
+ *   function may return stale data if plugin properties have changed.
+ *
  * @return array
  *   An array of arrays with information about all available encryption methods.
  */
-function encrypt_get_encryption_methods($all = TRUE) {
+function encrypt_get_encryption_methods($all = TRUE, $reset = FALSE) {
+  // Clear the plugin cache if necessary.
+  if ($reset) {
+    _encrypt_clear_plugin_cache('encryption_methods');
+  }
+
   ctools_include('plugins');
   $methods = ctools_get_plugins('encrypt', 'encryption_methods');
 
@@ -154,15 +163,23 @@ function encrypt_get_key_provider($provider = NULL) {
 }
 
 /**
- * Helper function to get all encryption key providers.
+ * Returns info for all encryption key providers.
  *
  * @param boolean $all
  *   A flag indicating whether to include plugins with unmet dependencies.
  *
+ * @param boolean $reset
+ *   A flag indicating whether to clear the plugin cache. Otherwise, this
+ *   function may return stale data if plugin properties have changed.
+ * 
  * @return array
  *   An array of arrays with information about all available key providers.
  */
-function encrypt_get_key_providers($all = TRUE) {
+function encrypt_get_key_providers($all = TRUE, $reset = FALSE) {
+  if ($reset) {
+    _encrypt_clear_plugin_cache('key_providers');
+  }
+
   ctools_include('plugins');
   $providers = ctools_get_plugins('encrypt', 'key_providers');
 
@@ -218,6 +235,18 @@ function _encrypt_plugin_is_valid($plugin) {
   }
   else {
     return TRUE;
+  }
+}
+
+/**
+ * Helper function to clear encrypt plugin caches.
+ */
+function _encrypt_clear_plugin_cache($type = NULL) {
+  if ($type) {
+    cache_clear_all("plugins:encrypt:$type", 'cache');
+  }
+  else {
+    cache_clear_all('plugins:encrypt:', 'cache', TRUE);
   }
 }
 

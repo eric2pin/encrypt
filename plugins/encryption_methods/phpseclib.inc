@@ -29,16 +29,18 @@ function _encrypt_encryption_methods_phpseclib($op = 'encrypt', $text = '', $key
 }
 
 /**
- * Callback to see if the MCrypt library is present.
+ * Callback to see if the phpseclib library is present.
  */
 function _encrypt_phpseclib_dependencies() {
   $errors = array();
 
   if (!module_exists('libraries')) {
-    $errors[] = t('You must download and install the !link module.', array('!link' => l('Libraries API', 'http://drupal.org/project/libraries')));
+    $errors[] = t('You must download and enable the !link module.', array('!link' => l('Libraries API', 'http://drupal.org/project/libraries')));
   }
   if (!file_exists('sites/all/libraries/phpseclib') && !file_exists(conf_path() . '/phpseclib')) {
-    $errors[] = t('You must download the !link library and place it in either sites/all/libraries or sites/yourdomain/libraries.', array('!link' => 'http://phpseclib.sourceforge.net/'));
+    $errors[] = t('You must download the !link library and place it in either sites/all/libraries or sites/yourdomain/libraries.', array(
+      '!link' => l('phpseclib', 'http://phpseclib.sourceforge.net/')
+    ));
   }
 
   return $errors;

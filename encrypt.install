@@ -46,30 +46,29 @@ function encrypt_requirements($phase) {
         $requirements['encrypt_dependencies'] = array(
           'title' => t('Encrypt Dependencies'),
           'value' => t('Unmet dependencies'),
-          'description' => $dependency_errors,
+          'description' => t('There are unmet dependencies in your active encryption plugins. Either !change_link or resolve the following dependencies: !deps', array(
+            '!change_link' => l('change your encryption settings', 'admin/config/system/encrypt'),
+            '!deps' => $dependency_errors,
+          )),
           'severity' => REQUIREMENT_ERROR,
         );
       }
 
       // Set a warning about the Drupal Private Key method. 
-      $issues = array();
       if ($key_provider['name'] == 'drupal_private_key') {
-        $issues['description'] = t(
-          'The site is using the private key stored in the database to encrypt
-          data. While this provides some level of obfuscation, it is highly
-          recommended to store the encryption key outside of the database.
-          See the !link for more information.', array(
-            '!link' => l('Encrypt module page', 'http://drupal.org/project/encrypt'),
-          )
+        $requirements['encrypt_secure'] = array(
+          'title' => t('Encryption Security'),
+          'description' => t(
+            'The site is using the private key stored in the database to encrypt
+            data. While this provides some level of obfuscation, it is highly
+            recommended to store the encryption key outside of the database.
+            See the !link for more information.', array(
+              '!link' => l('Encrypt module page', 'http://drupal.org/project/encrypt'),
+          )),
+          'severity' => REQUIREMENT_WARNING,
+          'value' => t('Security concerns'),
         );
-        $issues['severity'] = REQUIREMENT_WARNING;
-        $issues['value'] = t('Security concerns');
       }
-      $requirements['encrypt_secure'] = $issues + array(
-        'title' => t('Encryption Security'),
-        'value' => t('Secure'),
-        'severity' => REQUIREMENT_OK,
-      );
 
       break;
   }

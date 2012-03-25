@@ -31,11 +31,9 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
   function testNoneEncryptDecrypt() {
     // First, generate a random string to encrypt.
     $random = $this->randomName(10);
-    debug($random);
 
     // Encrypt the string.
     $encrypted = encrypt($random, array(), 'none');
-    debug($encrypted);
     $this->assertNotEqual($random, $encrypted, t('None: A value, encrypted, does not equal itself.'));
     $this->assertTrue(strpos($encrypted, 'a:') === 0, t('None: The encrypted value is a serialized array.'));
 
@@ -46,7 +44,6 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
 
     // Then, decrypt the encrypted string.
     $decrypted = decrypt($encrypted, array(), 'none');
-    debug($decrypted);
     $this->assertEqual($random, $decrypted, t('None: A value, decrypted, equals itself.'));
   }
 
@@ -191,12 +188,33 @@ class EncryptEncryptionMethodPluginsTest extends DrupalWebTestCase {
   /**
    * Ensure that our declared encryption method appears on the settings page.
    */
-  function testMethodAppearsInList() {
+  function testPluginsAppearInList() {
     $this->drupalGet('admin/config/system/encrypt');
     $this->assertText('Test Method', t('Encryption method name is present.'));
     $this->assertText('This is just a test encryption method.', t('Encryption method description is present.'));
     $this->assertText('Test Key Provider', t('Key provider name is present.'));
     $this->assertText('This is just a test key provider.', t('Key provider description is present.'));
+  }
+
+  /**
+   * Test that plugins cannot be enabled if dependencies are not met.
+   */
+  function testPluginDependencies() {
+    // First, set the variable to trigger our unmet dependency.
+    variable_set('encrypt_test_trigger_unmet_deps', TRUE);
+
+    // Then make sure dependency errors appear on the page, and the method
+    // cannot be enabled.
+    $this->drupalGet('admin/config/system/encrypt');
+    $this->assertText('This is an unmet dependency.');
+    $this->assertFieldByXPath('//input[@name="encrypt_encryption_method" and @value="test" and @disabled]');
+
+    // Now disable the unmet dependency and make sure all is OK. Note that this
+    // should also implicitly test the plugin cache-clearing mechanism.
+    variable_set('encrypt_test_trigger_unmet_deps', FALSE);
+    $this->drupalGet('admin/config/system/encrypt');
+    $this->assertNoText('This is an unmet dependency.');
+    $this->assertNoFieldByXPath('//input[@name="encrypt_encryption_method" and @value="test" and @disabled]');
   }
 
 }
