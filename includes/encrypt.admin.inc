@@ -98,7 +98,27 @@ function encrypt_admin_settings($form, &$form_state) {
   }
 
   // Make a system setting form and return.
+  $form['#submit'][] = 'encrypt_admin_settings_submit';
   return system_settings_form($form);
+}
+
+/**
+ * Submit callback for admin settings form.
+ *
+ * Process submit callbacks for each of the selected encrypt plugins.
+ */
+function encrypt_admin_settings_submit($form, &$form_state) {
+  $method = encrypt_get_encryption_method($form_state['values']['encrypt_encryption_method']);
+  $key_provider = encrypt_get_key_provider($form_state['values']['encrypt_key_provider']);
+    
+  foreach (array($method, $key_provider) as $plugin) {
+    if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
+      // Create a copy so that the plugin callback cannot change the
+      // form state.
+      $form_state_copy = $form_state;
+      call_user_func($submit_callback, $form, $form_state_copy);
+    }
+  }
 }
 
 /**

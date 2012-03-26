@@ -1,4 +1,4 @@
-Implementing key providers is, programmatically, very similar to defining <a href="&topic:encrypt/encryption_methods&">encryption methods</a> (or any other <a href="&topic:ctools/plugins-implementing&">ctools plugins</a>, for that matter.
+Implementing key providers is, programmatically, very similar to defining <a href="&topic:encrypt/encryption_methods&">encryption methods</a> (or any other <a href="&topic:ctools/plugins-implementing&">ctools plugins</a>, for that matter).
 
 The paramters of a key provider plugin are as follows:
 <dt>title</dt>
@@ -23,3 +23,5 @@ function _mcrypt_extension_is_present() {
   return $errors;
 }
 </pre></dd>
+<dt>submit callback</dt>
+<dd>Optional. The name of a function that will be called when the encrypt settings form is saved. This allows plugins to perform additional actions when settings are saved. The function should take the $form and $form_state as arguments, just like most other form submit handlers. See the file key provider plugin for an example.</dd>

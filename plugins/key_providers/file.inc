@@ -10,6 +10,7 @@ $plugin = array(
   'description' => t('Use a file to store the encryption key.'),
   'key callback' => 'encrypt_get_file_key',
   'settings form' => 'encrypt_file_key_settings_form',
+  'submit callback' => 'encrypt_file_key_settings_form_submit',
 );
 
 /**
@@ -67,4 +68,11 @@ function encrypt_file_key_path_validate($element, &$form_state, $form) {
   if (!file_exists($element['#value'])) {
     form_error($element, t('The file %dir does not exist.', array('%dir' => $element['#value'])));
   }
+}
+
+/**
+ * Submit callback for the settings form.
+ */
+function encrypt_file_key_settings_form_submit($form, $form_state) {
+  // TODO: Save the key file.
 }

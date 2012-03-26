@@ -25,7 +25,7 @@ $plugin = array(
   'title' => t('Mcrypt AES 256'),
   'description' => t('This uses PHPs mcrypt extension and <a href="!url">AES-256</a>.', array('!url' => 'http://en.wikipedia.org/wiki/Advanced_Encryption_Standard')),
   'encrypt callback' => 'encrypt_encryption_methods_mcrypt_rij_256',
-  'dependencies' => 'mcrypt_extension_is_present',
+  'dependency callback' => 'mcrypt_extension_is_present',
 );
 </pre>
 The plugin can just be declared in the global space; no need to wrap it in a function or anything. Available options for the $plugin array include:
@@ -35,7 +35,7 @@ The plugin can just be declared in the global space; no need to wrap it in a fun
 <dd><strong>Required</strong>. A brief description of your encryption method. Also appears in smaller text on the Encrypt admin page.</dd>
 <dt>encrypt callback</dt>
 <dd><strong>Required</strong>. This is the name of a function that you define in your plugin file. Encrypt will use this function to encrypt and decrypt text for your encryption method.</dd>
-<dt>dependencies</dt>
+<dt>dependency callback</dt>
 <dd>Optional. The name of a function in your plugin file that declares whether or not an encryption method's dependencies have been met. The function should return an array of error messages (if there are any) or an empty array or FALSE if all dependencies are met. For example:</dd>
 <dd><pre>
 /**
@@ -51,6 +51,8 @@ function _mcrypt_extension_is_present() {
   return $errors;
 }
 </pre></dd>
+<dt>submit callback</dt>
+<dd>Optional. The name of a function that will be called when the encrypt settings form is saved. This allows plugins to perform additional actions when settings are saved. The function should take the $form and $form_state as arguments, just like most other form submit handlers. See the file key provider plugin for an example.</dd>
 </li>
 
 <li>
