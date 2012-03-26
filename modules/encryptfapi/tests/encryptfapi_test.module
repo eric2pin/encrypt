@@ -6,14 +6,14 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function encryptfapi_menu() {
   $items = array();
 
   $items['encryptfapi_test'] = array(
-    'title' => t('Encrypt FAPI Test'),
-    'description' => t('A test page for the Encrypt FAPI module.'),
+    'title' => 'Encrypt FAPI Test',
+    'description' => 'A test page for the Encrypt FAPI module.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('encryptfapi_test_form'),
     'access callback' => TRUE,

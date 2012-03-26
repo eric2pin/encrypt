@@ -2,12 +2,12 @@
 
 /**
  * @file
- * 
+ *
  * Main module file for Encrypt Form API module.
  */
 
 /**
- * Implementation of hook_form_alter().
+ * Implements hook_form_alter().
  *
  * Loop through form, find elements with #encrypt, add them to an array, and
  * add our submit callback.
@@ -49,7 +49,7 @@ function _encryptfapi_form_submit($form, &$form_state) {
 }
 
 /**
- * Implementation of hook_element_info_alter().
+ * Implements hook_element_info_alter().
  *
  * Declare a callback for decrypting default values on elements marked as #encrypt.
  */
@@ -62,7 +62,7 @@ function encryptfapi_element_info_alter(&$type) {
 
 /**
  * Helper function to traverse array and find all elements with #encrypt
- * 
+ *
  * @param $form
  *  The form tree to parse.
  *
@@ -79,7 +79,8 @@ function _encryptfapi_process_elements($form, &$encrypted_elements = array()) {
   foreach (element_children($form) as $element) {
     if (isset($form[$element]['#type']) && in_array($form[$element]['#type'], $accepted_types) && isset($form[$element]['#encrypt']) && $form[$element]['#encrypt']) {
       $encrypted_elements[$element] = $form[$element]['#encrypt'];
-    } elseif (is_array($form[$element])) {
+    }
+    elseif (is_array($form[$element])) {
       _encryptfapi_process_elements($form[$element], $encrypted_elements);
     }
   }

@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_encrypt_api().
+ * Implements hook_ctools_plugin_directory().
  */
 function encrypt_test_ctools_plugin_directory($module, $plugin) {
   if ($module == 'encrypt') {

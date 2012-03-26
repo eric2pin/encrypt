@@ -20,7 +20,7 @@
  */
 
 /**
- * Implements of hook_help().
+ * Implements hook_help().
  */
 function encrypt_help($path, $arg) {
   switch ($path) {
@@ -36,7 +36,7 @@ function encrypt_help($path, $arg) {
 }
 
 /**
- * Implements of hook_menu().
+ * Implements hook_menu().
  */
 function encrypt_menu() {
   $items = array();
@@ -55,7 +55,7 @@ function encrypt_menu() {
 }
 
 /**
- * Implements of hook_permission().
+ * Implements hook_permission().
  */
 function encrypt_permission() {
   return array(
@@ -66,7 +66,7 @@ function encrypt_permission() {
 }
 
 /**
- * Implements of hook_ctools_plugin_type().
+ * Implements hook_ctools_plugin_type().
  *
  * Tell ctools about our plugin types.
  */
@@ -171,7 +171,7 @@ function encrypt_get_key_provider($provider = NULL) {
  * @param boolean $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, this
  *   function may return stale data if plugin properties have changed.
- * 
+ *
  * @return array
  *   An array of arrays with information about all available key providers.
  */
@@ -295,7 +295,7 @@ function decrypt($text = '', $options = array(), $method = NULL, $key_provider =
 }
 
 /**
- * Implements of hook_ctools_plugin_directory().
+ * Implements hook_ctools_plugin_directory().
  *
  * Tell ctools about our plugins.
  */

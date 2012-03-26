@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements of hook_uninstall().
+ * Implements hook_uninstall().
  *
  * Delete all of our variables from the variables table.
  */
@@ -32,7 +32,6 @@ function encrypt_requirements($phase) {
     case 'runtime':
       $method = encrypt_get_encryption_method();
       $key_provider = encrypt_get_key_provider();
-      $dependency_errors = '';
 
       // Check the plugins for dependency errors.
       if (isset($method['dependency errors']) && !empty($method['dependency errors'])) {
