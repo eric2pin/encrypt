@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @file
+ * An example encryption method just for tests.
+ *
+ * @ingroup encrypt
+ */
+
 $plugin = array(
   'title' => t('Test Method'),
   'description' => t('This is just a test encryption method.'),

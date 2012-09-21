@@ -1,8 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Plugin definition for the phpseclib encryption method.
+ */
+
 $plugin = array(
   'title' => t('PHP Secure Communications Library (phpseclib)'),
-  'description' => t('Uses the !link library. This method is only preferable if you cannot install mcrypt.', array('!link' => l('phpseclib', 'http://phpseclib.sourceforge.net/'))),
+  'description' => t('Uses the <a href="http://phpseclib.sourceforge.net/">phpseclib</a> library. This method is only preferable if you cannot install mcrypt.'),
   'encrypt callback' => '_encrypt_encryption_methods_phpseclib',
   'dependency callback' => '_encrypt_phpseclib_dependencies',
 );
@@ -35,12 +40,10 @@ function _encrypt_phpseclib_dependencies() {
   $errors = array();
 
   if (!module_exists('libraries')) {
-    $errors[] = t('You must download and enable the !link module.', array('!link' => l('Libraries API', 'http://drupal.org/project/libraries')));
+    $errors[] = t('You must download and enable the <a href="http://drupal.org/project/libraries">Libraries API</a> module.');
   }
   if (!file_exists('sites/all/libraries/phpseclib') && !file_exists(conf_path() . '/phpseclib')) {
-    $errors[] = t('You must download the !link library and place it in either sites/all/libraries or sites/yourdomain/libraries.', array(
-      '!link' => l('phpseclib', 'http://phpseclib.sourceforge.net/')
-    ));
+    $errors[] = t('You must download the <a href="http://phpseclib.sourceforge.net/">phpseclib</a> library and place it in either sites/all/libraries or sites/yourdomain/libraries.');
   }
 
   return $errors;

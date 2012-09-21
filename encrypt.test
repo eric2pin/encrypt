@@ -39,7 +39,7 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
 
     // Since no actual encryption is being performed, ensure that the "encrypted" text is the same as the original.
     $encryptedArray = unserialize($encrypted);
-    $this->assertEqual($random, $encryptedArray['text'], t('None: Initial value equals "encrypted" value.')); 
+    $this->assertEqual($random, $encryptedArray['text'], t('None: Initial value equals "encrypted" value.'));
     $this->assertEqual($encryptedArray['method'], 'none', t('None: Encryption method stored correctly.'));
 
     // Then, decrypt the encrypted string.
@@ -84,7 +84,8 @@ class EncryptEncryptDecryptTest extends DrupalWebTestCase {
 
       $decrypted = decrypt($encrypted, array(), 'mcrypt_rij_256');
       $this->assertEqual($random, $decrypted, t('MCrypt: A value, decrypted, equals itself.'));
-    } else {
+    }
+    else {
       debug('MCrypt extension not present. Skipping tests.');
     }
   }

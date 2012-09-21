@@ -53,7 +53,7 @@ function encrypt_requirements($phase) {
         );
       }
 
-      // Set a warning about the Drupal Private Key method. 
+      // Set a warning about the Drupal Private Key method.
       if ($key_provider['name'] == 'drupal_private_key') {
         $requirements['encrypt_secure'] = array(
           'title' => t('Encryption Security'),
@@ -72,7 +72,7 @@ function encrypt_requirements($phase) {
       break;
   }
 
-  return $requirements;  
+  return $requirements;
 }
 
 /**

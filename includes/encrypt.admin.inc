@@ -110,7 +110,7 @@ function encrypt_admin_settings($form, &$form_state) {
 function encrypt_admin_settings_submit($form, &$form_state) {
   $method = encrypt_get_encryption_method($form_state['values']['encrypt_encryption_method']);
   $key_provider = encrypt_get_key_provider($form_state['values']['encrypt_key_provider']);
-    
+
   foreach (array($method, $key_provider) as $plugin) {
     if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
       // Create a copy so that the plugin callback cannot change the

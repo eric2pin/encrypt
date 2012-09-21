@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @file
+ * An example key provider just for tests.
+ *
+ * @ingroup encrypt
+ */
+
 $plugin = array(
   'title' => t('Test Key Provider'),
   'description' => t('This is just a test key provider.'),
