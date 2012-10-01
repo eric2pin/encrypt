@@ -42,14 +42,14 @@ class EncryptFAPITest extends DrupalWebTestCase {
     $this->assertFieldByName('encryptfapi_textfield_simple', $data['encryptfapi_textfield_simple'], t('Simple: The value appears unencrypted in the textfield.'));
     $encrypted_value = variable_get('encryptfapi_textfield_simple', 'A Test Value');
     $this->assertNotEqual($data['encryptfapi_textfield_simple'], $encrypted_value['text'], t('Simple: The value stored does not equal the value shown.'));
-    $this->assertEqual($data['encryptfapi_textfield_simple'], decrypt($encrypted_value), t('Simple: The stored value, when decrypted, equals the displayed/original value.'));
+    $this->assertEqual($data['encryptfapi_textfield_simple'], decrypt($encrypted_value, array('base64' => TRUE)), t('Simple: The stored value, when decrypted, equals the displayed/original value.'));
 
     // Then, the complex one.
     $this->assertFieldByName('encryptfapi_textfield_complex', $data['encryptfapi_textfield_complex'], t('Complex: The value appears unencrypted in the textfield.'));
     $encrypted_value = variable_get('encryptfapi_textfield_complex', 'A Test Value');
     $unserialized = unserialize($encrypted_value);
     $this->assertNotEqual($data['encryptfapi_textfield_complex'], $encrypted_value['text'], t('Complex: The value stored does not equal the value shown.'));
-    $this->assertEqual($data['encryptfapi_textfield_complex'], decrypt($encrypted_value), t('Complex: The stored value, when decrypted, equals the displayed/original value.'));
+    $this->assertEqual($data['encryptfapi_textfield_complex'], decrypt($encrypted_value, array('base64' => TRUE)), t('Complex: The stored value, when decrypted, equals the displayed/original value.'));
     $this->assertEqual('mcrypt_rij_256', $unserialized['method'], t('The correct encryption method was used.'));
 
     // Then, a nested one.
@@ -58,7 +58,7 @@ class EncryptFAPITest extends DrupalWebTestCase {
     $encrypted_value = variable_get('encrypt_tree', array());
     $unserialized = unserialize($encrypted_value['encryptfapi_textfield_nested']);
     $this->assertNotEqual($data['encrypt_tree[encryptfapi_textfield_nested]'], $unserialized['text'], t('Nested: The value stored does not equal the value shown.'));
-    $this->assertEqual($data['encrypt_tree[encryptfapi_textfield_nested]'], decrypt($encrypted_value['encryptfapi_textfield_nested']), t('Nested: The stored value, when decrypted, equals the displayed/original value.'));
+    $this->assertEqual($data['encrypt_tree[encryptfapi_textfield_nested]'], decrypt($encrypted_value['encryptfapi_textfield_nested'], array('base64' => TRUE)), t('Nested: The stored value, when decrypted, equals the displayed/original value.'));
   }
 
 }
