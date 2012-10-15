@@ -61,6 +61,7 @@ function encrypt_permission() {
   return array(
     'administer encrypt' => array(
       'title' => t('Administer encryption settings'),
+      'description' => 'Change encryption settings (does not let them view encrypted data).'
     ),
   );
 }
