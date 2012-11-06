@@ -86,6 +86,7 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
       'text' => $processed,
       'method' => $method,
       'key_provider' => $key_provider,
+      'options' => $options,
     );
     // Serialize array.
     $processed = serialize($encryption_array);

@@ -154,7 +154,7 @@ class EncryptPortability extends DrupalWebTestCase {
     $encrypted_array = unserialize($encrypted);
     $this->assertTrue(isset($encrypted_array['key_provider']), t('The key provider key exists in the encrypted array.'));
     unset($encrypted_array['key_provider']);
-    $this->assertEqual(count($encrypted_array), 2, t('The key provider was successfully unset.'));
+    $this->assertEqual(count($encrypted_array), 3, t('The key provider was successfully unset.'));
     $encrypted = serialize($encrypted_array);
 
     // Now, we'll attempt to decrypt.
