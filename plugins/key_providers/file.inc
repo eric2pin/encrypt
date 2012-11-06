@@ -19,17 +19,18 @@ $plugin = array(
  * Callback method to return the encryption key from a file.
  */
 function encrypt_get_file_key($settings) {
+  $file_name = $settings['path'] . ENCRYPT_FILE_NAME;
   // If the file doesn't exist, just abort.
-  if (!file_exists($settings['path'])) {
+  if (!file_exists($file_name)) {
     drupal_set_message(t('The file %dir does not exist! Encrypt cannot retrieve encryption key.', array('%dir' => $settings['path'])), 'error');
     return;
   }
 
   switch ($settings['method']) {
     case 'file_contents':
-      return file_get_contents($settings['path']);
+      return file_get_contents($file_name);
     case 'md5':
-      return md5_file($settings['path']);
+      return md5_file($file_name);
   }
 }
 
