@@ -60,6 +60,7 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
     $method = isset($encryption_array['method']) ? $encryption_array['method'] : $method;
     $key_provider = isset($encryption_array['key_provider']) ? $encryption_array['key_provider'] : $key_provider;
     $text = isset($encryption_array['text']) ? $encryption_array['text'] : $text;
+    $options = isset($encryption_array['options']) ? $encryption_array['options'] + $options : $options;
   }
 
   // If there is no method, assume we will be using the default.
