@@ -6,20 +6,127 @@
  */
 
 /**
+ * Implements hook_schema().
+ *
+ * Create table to store encryption configurations.
+ */
+function encrypt_schema() {
+  $schema['encrypt_config'] = array(
+    'description' => 'Stores encryption configurations.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'The machine name of the configuration.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable label of the configuration.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'A brief description of the configuration.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+      'method' => array(
+        'description' => 'The encryption method to use.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'method_settings' => array(
+        'description' => 'Additional settings for the encryption method.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'provider' => array(
+        'description' => 'The key provider to use.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'provider_settings' => array(
+        'description' => 'Additional settings for the key provider.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'enabled' => array(
+        'description' => 'A boolean indicating whether this configuration is enabled.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the configuration was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the configuration was last saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'enabled' => array('enabled'),
+    ),
+    'primary key' => array('name'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function encrypt_install() {
+  $t = get_t();
+
+  // Add a default configuration.
+  db_insert('encrypt_config')
+    ->fields(array(
+      'name' => 'default',
+      'label' => $t('Default'),
+      'description' => $t('The default configuration.'),
+      'method' => 'default',
+      'method_settings' => '',
+      'provider' => 'drupal_private_key',
+      'provider_settings' => '',
+      'enabled' => 1,
+      'created' => REQUEST_TIME,
+      'changed' => REQUEST_TIME,
+    ))
+    ->execute();
+
+  variable_set('encrypt_default_config', 'default');
+}
+
+/**
  * Implements hook_uninstall().
  *
  * Delete all of our variables from the variables table.
  */
 function encrypt_uninstall() {
-  $vars = db_select('variable', 'v')
-    ->fields('v', array('name'))
-    ->condition('name', 'encrypt_%', 'LIKE')
-    ->execute()
-    ->fetchCol();
+  variable_del('encrypt_default_config');
 
-  foreach ($vars as $var) {
-    variable_del($var);
+  // Delete any variables left over from older versions of Encrypt.
+  variable_del('encrypt_encryption_method');
+  $provider = variable_get('encrypt_key_provider', '');
+  if ($provider) {
+    variable_del('encrypt_key_providers_' . $provider . '_settings');
   }
+  variable_del('encrypt_key_provider');
 }
 
 /**
@@ -98,4 +205,117 @@ function encrypt_update_7201() {
     ));
     variable_del('encrypt_secure_key_path');
   }
+}
+
+/**
+ * Create table to store encryption configurations.
+ */
+function encrypt_update_7202() {
+  $table = array(
+    'description' => 'Stores encryption configurations.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'The machine name of the configuration.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable label of the configuration.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'A brief description of the configuration.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+      'method' => array(
+        'description' => 'The encryption method to use.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'method_settings' => array(
+        'description' => 'Additional settings for the encryption method.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'provider' => array(
+        'description' => 'The key provider to use.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'provider_settings' => array(
+        'description' => 'Additional settings for the key provider.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'enabled' => array(
+        'description' => 'A boolean indicating whether this configuration is enabled.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the configuration was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the configuration was last saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'enabled' => array('enabled'),
+    ),
+    'primary key' => array('name'),
+  );
+
+  if (!db_table_exists('encrypt_config')) {
+    db_create_table('encrypt_config', $table);
+  }
+}
+
+/**
+ * Migrate any settings in the variable table to a default configuration.
+ */
+function encrypt_update_7203() {
+  $t = get_t();
+
+  $method = variable_get('encrypt_encryption_method', 'default');
+  $provider = variable_get('encrypt_key_provider', 'drupal_private_key');
+  $provider_settings = variable_get('encrypt_key_providers_' . $provider . '_settings', '');
+
+  db_insert('encrypt_config')
+    ->fields(array(
+      'name' => 'default',
+      'label' => $t('Default'),
+      'description' => $t('The default configuration.'),
+      'method' => $method,
+      'method_settings' => '',
+      'provider' => $provider,
+      'provider_settings' => serialize($provider_settings),
+      'enabled' => 1,
+      'created' => REQUEST_TIME,
+      'changed' => REQUEST_TIME,
+    ))->execute();
+
+  variable_set('encrypt_default_config', 'default');
+
+  variable_del('encrypt_encryption_method');
+  variable_del('encrypt_key_provider');
+  variable_del('encrypt_key_providers_' . $provider . '_settings');
 }

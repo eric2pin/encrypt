@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Encrypt Main CSS
@@ -21,4 +20,7 @@
 
 ul.encrypt-dependency-errors {
   color: #FF0000;
+}
+.vertical-tabs .form-type-textfield input {
+  width: auto;
 }
