@@ -12,10 +12,9 @@ $plugin = array(
 );
 
 /**
- * Callback for Encrypt implementation: default
+ * Callback for Encrypt implementation: default.
  *
- * This method uses a simple encryption method of character
- * replacement.
+ * This method uses a simple encryption method of character replacement.
  */
 function encrypt_encryption_methods_basic($op = 'encrypt', $text = '', $key = '', $options = array()) {
   $processed_text = '';

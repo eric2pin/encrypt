@@ -133,6 +133,7 @@ function encrypt_uninstall() {
  * Implements hook_requirements().
  */
 function encrypt_requirements($phase) {
+  $t = get_t();
   $requirements = array();
 
   switch ($phase) {
@@ -150,10 +151,10 @@ function encrypt_requirements($phase) {
 
       if (isset($dependency_errors) && !empty($dependency_errors)) {
         $requirements['encrypt_dependencies'] = array(
-          'title' => t('Encrypt Dependencies'),
-          'value' => t('Unmet dependencies'),
-          'description' => t('There are unmet dependencies in your active encryption plugins. Either !change_link or resolve the following dependencies: !deps', array(
-            '!change_link' => l('change your encryption settings', 'admin/config/system/encrypt'),
+          'title' => $t('Encrypt Dependencies'),
+          'value' => $t('Unmet dependencies'),
+          'description' => $t('There are unmet dependencies in your active encryption plugins. Either !change_link or resolve the following dependencies: !deps', array(
+            '!change_link' => l($t('change your encryption settings'), 'admin/config/system/encrypt'),
             '!deps' => $dependency_errors,
           )),
           'severity' => REQUIREMENT_ERROR,
@@ -163,20 +164,21 @@ function encrypt_requirements($phase) {
       // Set a warning about the Drupal Private Key method.
       if ($key_provider['name'] == 'drupal_private_key') {
         $requirements['encrypt_secure'] = array(
-          'title' => t('Encryption Security'),
-          'description' => t(
+          'title' => $t('Encryption Security'),
+          'description' => $t(
             'The site is using the private key stored in the database to encrypt
             data. While this provides some level of obfuscation, it is highly
             recommended to store the encryption key outside of the database.
             See the !link for more information.', array(
-              '!link' => l('Encrypt module page', 'http://drupal.org/project/encrypt'),
-          )),
+              '!link' => l($t('Encrypt module page'), 'http://drupal.org/project/encrypt'),
+            )
+          ),
           'severity' => REQUIREMENT_WARNING,
-          'value' => t('Security concerns'),
+          'value' => $t('Security concerns'),
         );
       }
-
       break;
+
   }
 
   return $requirements;
@@ -184,6 +186,7 @@ function encrypt_requirements($phase) {
 
 /**
  * Our default encryption method variable has changed.
+ *
  * So get the old one and save it as the new one.
  */
 function encrypt_update_7200() {

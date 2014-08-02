@@ -29,8 +29,10 @@ function encrypt_get_file_key($settings) {
   switch ($settings['method']) {
     case 'file_contents':
       return file_get_contents($file_name);
+
     case 'md5':
       return md5_file($file_name);
+
   }
 }
 
@@ -97,7 +99,7 @@ function encrypt_file_key_settings_form_submit($form, $form_state) {
   $directory = $form_state['values']['encrypt_key_providers_file_settings']['path'];
   $file = $directory . '/' . ENCRYPT_FILE_NAME;
 
-  // Check for contents of file; do not write over the key
+  // Check for contents of file; do not write over the key.
   if (file_exists($file) && file_get_contents($file)) {
     return;
   }
@@ -108,7 +110,7 @@ function encrypt_file_key_settings_form_submit($form, $form_state) {
   fwrite($open_file, $new_key);
   fclose($open_file);
 
-  // Ensure that the file is only readable and writable by owner
+  // Ensure that the file is only readable and writable by owner.
   drupal_chmod($file, 0600);
 
   drupal_set_message(t('The key file has been written to %file', array(

@@ -97,7 +97,7 @@ function encrypt_permission() {
   return array(
     'administer encrypt' => array(
       'title' => t('Administer encryption settings'),
-      'description' => 'Change encryption settings (does not let them view encrypted data).'
+      'description' => 'Change encryption settings (does not let them view encrypted data).',
     ),
   );
 }
@@ -330,10 +330,10 @@ function encrypt_get_encryption_method($method = NULL) {
 /**
  * Returns information for all encryption methods.
  *
- * @param boolean $all
+ * @param bool $all
  *   A flag indicating whether to include plugins with unmet dependencies.
  *
- * @param boolean $reset
+ * @param bool $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, this
  *   function may return stale data if plugin properties have changed.
  *
@@ -376,10 +376,10 @@ function encrypt_get_key_provider($provider = NULL) {
 /**
  * Returns info for all encryption key providers.
  *
- * @param boolean $all
+ * @param bool $all
  *   A flag indicating whether to include plugins with unmet dependencies.
  *
- * @param boolean $reset
+ * @param bool $reset
  *   A flag indicating whether to clear the plugin cache. Otherwise, this
  *   function may return stale data if plugin properties have changed.
  *
@@ -428,13 +428,14 @@ function _encrypt_plugin_process(&$plugin, $info) {
 }
 
 /**
- * Helper function to determine if a plugin has unmet dependencies. Most
- * helpful in conjunction with array_filter().
+ * Helper function to determine if a plugin has unmet dependencies. 
+ * 
+ * Most helpful in conjunction with array_filter().
  *
- * @param $plugin array
+ * @param array $plugin
  *   The plugin to check.
  *
- * @return boolean
+ * @return bool
  *   Whether or not the plugin is valid (has no unmet dependencies).
  */
 function _encrypt_plugin_is_valid($plugin) {
@@ -459,8 +460,6 @@ function _encrypt_clear_plugin_cache($type = NULL) {
 }
 
 /**
- * Encrypt
- *
  * Encrypt text.
  *
  * @param string $text
@@ -487,8 +486,6 @@ function encrypt($text = '', $options = array(), $method = NULL, $key_provider =
 }
 
 /**
- * Decrypt
- *
  * Decrypt text.
  *
  * @param string $text

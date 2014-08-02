@@ -444,7 +444,7 @@ function _encrypt_admin_form_add_options($items, &$element) {
     if (!empty($item['dependency errors'])) {
       $element[$id]['#description'] .= theme('item_list', array(
         'items' => $item['dependency errors'],
-        'attributes' => array('class' => 'encrypt-dependency-errors')
+        'attributes' => array('class' => 'encrypt-dependency-errors'),
       ));
     }
   }

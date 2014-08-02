@@ -4,8 +4,6 @@ core = 7.x
 configure = admin/config/system/encrypt
 package = Encryption
 
-files[] = encrypt.module
 files[] = encrypt.test
-files[] = encrypt.install
 
 dependencies[] = ctools

@@ -13,16 +13,16 @@ $plugin = array(
 );
 
 /**
- * Callback for Encrypt implementation: Mcrypt
+ * Callback for Encrypt implementation: Mcrypt.
  *
- * This method uses a PHPs mcrypt extension and AES-256
+ * This method uses the phpseclib and AES-256.
  */
 function _encrypt_encryption_methods_phpseclib($op = 'encrypt', $text = '', $key, $options = array()) {
   $processed_text = '';
 
   if ($path = libraries_get_path('phpseclib')) {
     // Include the AES file and instantiate.
-    require_once($path . '/Crypt/AES.php');
+    require_once $path . '/Crypt/AES.php';
     $aes = new Crypt_AES();
 
     $aes->setKey($key);

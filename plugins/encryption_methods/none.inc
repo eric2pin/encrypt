@@ -12,7 +12,7 @@ $plugin = array(
 );
 
 /**
- * Callback for Encrypt implementation: none
+ * Callback for Encrypt implementation: none.
  */
 function encrypt_encryption_methods_none($op = 'encrypt', $text = '', $key, $options = array()) {
   return $text;

@@ -16,12 +16,18 @@ $plugin = array(
 
 /**
  * Callback for encryption.
- * We'll just return the text, since we're not concerned with testing encryption.
+ *
+ * Just return the text since we're not concerned with testing encryption.
  */
 function encrypt_test_encryption_methods_test($op = 'encrypt', $text = '', $options = array()) {
   return $text;
 }
 
+/**
+ * Dependency callback.
+ *
+ * Can be forced to trigger failure/success with a variable.
+ */
 function _encrypt_test_method_dependencies() {
   $errors = array();
 

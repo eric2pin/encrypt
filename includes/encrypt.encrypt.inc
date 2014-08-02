@@ -8,8 +8,6 @@
  */
 
 /**
- * Private Encrypt and Decrypt
- *
  * Private internal function to Encrypt and Decrypt text.
  *
  * @param string $op
