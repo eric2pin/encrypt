@@ -36,7 +36,7 @@ function _encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '',
     }
 
     // Decrypt text.
-    $processed_text = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv);
+    return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $text, MCRYPT_MODE_ECB, $iv));
   }
   else {
     // Encrypt.
@@ -46,9 +46,9 @@ function _encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '',
     if ($use_base64) {
       $processed_text = base64_encode($processed_text);
     }
-  }
 
-  return trim($processed_text);
+    return $processed_text;
+  }
 }
 
 /**
