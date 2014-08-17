@@ -22,7 +22,7 @@ function encrypt_get_file_key($settings) {
   $file_name = $settings['path'] . '/' . ENCRYPT_FILE_NAME;
   // If the file doesn't exist, just abort.
   if (!file_exists($file_name)) {
-    drupal_set_message(t('The file %dir does not exist! Encrypt cannot retrieve encryption key.', array('%dir' => $settings['path'])), 'error');
+    drupal_set_message(t('The file %file does not exist! Encrypt cannot retrieve encryption key.', array('%file' => $file_name)), 'error');
     return;
   }
 
