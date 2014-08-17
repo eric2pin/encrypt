@@ -202,9 +202,41 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
     '#required' => TRUE,
     '#options' => $method_options,
     '#default_value' => $config['method'],
+    '#ajax' => array(
+      'method' => 'replace',
+      'callback' => 'encrypt_encryption_methods_additional_settings_ajax',
+      'wrapper' => 'encrypt-encryption-methods-additional-settings',
+    ),
   );
   // Disable any method with dependency errors.
   _encrypt_admin_form_add_options($methods, $form['method_settings']['encrypt_encryption_method']);
+
+  $form['method_settings']['method_settings_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="encrypt-encryption-methods-additional-settings">',
+    '#suffix' => '</div>',
+  );
+
+  if (isset($form_state['values']['encrypt_encryption_method'])) {
+    $method = $form_state['values']['encrypt_encryption_method'];
+  }
+  elseif (isset($config['method'])) {
+    $method = $config['method'];
+  }
+  else {
+    $method = NULL;
+  }
+
+  if ($method) {
+    if ($method_settings_form = ctools_plugin_get_function($methods[$method], 'settings form')) {
+      $form['method_settings']['method_settings_wrapper']['method_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Additional Encryption Method Settings'),
+      );
+
+      $form['method_settings']['method_settings_wrapper']['method_settings']['encrypt_encryption_methods_' . $method . '_settings'] = array('#tree' => TRUE) + call_user_func($method_settings_form, $config['method_settings']);
+    }
+  }
 
   $form['provider_settings'] = array(
     '#type' => 'fieldset',
@@ -245,13 +277,13 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
   }
 
   if ($provider) {
-    if ($settings_form_method = ctools_plugin_get_function($providers[$provider], 'settings form')) {
+    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
       $form['provider_settings']['key_settings_wrapper']['key_settings'] = array(
         '#type' => 'fieldset',
         '#title' => t('Additional Key Provider Settings'),
       );
 
-      $form['provider_settings']['key_settings_wrapper']['key_settings']['encrypt_key_providers_' . $provider . '_settings'] = array('#tree' => TRUE) + call_user_func($settings_form_method, $config['provider_settings']);
+      $form['provider_settings']['key_settings_wrapper']['key_settings']['encrypt_key_providers_' . $provider . '_settings'] = array('#tree' => TRUE) + call_user_func($provider_settings_form, $config['provider_settings']);
     }
   }
 
@@ -310,11 +342,17 @@ function encrypt_config_form_submit($form, &$form_state) {
     'label' => (string) $form_state['values']['label'],
     'description' => (string) $form_state['values']['description'],
     'method' => (string) $form_state['values']['encrypt_encryption_method'],
-    'method_settings' => '',
     'provider' => (string) $form_state['values']['encrypt_key_provider'],
     'enabled' => (int) $form_state['values']['enabled'],
     'changed' => REQUEST_TIME,
   );
+
+  if (empty($form_state['values']['encrypt_encryption_methods_' . $fields['method'] . '_settings'])) {
+    $fields['method_settings'] = '';
+  }
+  else {
+    $fields['method_settings'] = serialize($form_state['values']['encrypt_encryption_methods_' . $fields['method'] . '_settings']);
+  }
 
   if (empty($form_state['values']['encrypt_key_providers_' . $fields['provider'] . '_settings'])) {
     $fields['provider_settings'] = '';
@@ -424,7 +462,14 @@ function encrypt_config_make_default($config) {
 }
 
 /**
- * Callback for AJAX form re-rendering.
+ * Callback for AJAX form re-rendering for method additional settings.
+ */
+function encrypt_encryption_methods_additional_settings_ajax($form, $form_state) {
+  return $form['method_settings']['method_settings_wrapper'];
+}
+
+/**
+ * Callback for AJAX form re-rendering for provider additional settings.
  */
 function encrypt_key_providers_additional_settings_ajax($form, $form_state) {
   return $form['provider_settings']['key_settings_wrapper'];
