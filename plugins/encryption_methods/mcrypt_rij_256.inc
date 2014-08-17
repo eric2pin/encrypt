@@ -17,7 +17,7 @@ $plugin = array(
  *
  * This method uses a PHPs mcrypt extension and AES-256
  */
-function _encrypt_encryption_methods_mcrypt_rij_256($op = 'encrypt', $text = '', $key, $options = array()) {
+function _encrypt_encryption_methods_mcrypt_rij_256($op, $text, $key, $options = array()) {
   $processed_text = '';
 
   // Key cannot be too long for this encryption.

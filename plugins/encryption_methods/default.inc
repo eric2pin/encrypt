@@ -16,7 +16,7 @@ $plugin = array(
  *
  * This method uses a simple encryption method of character replacement.
  */
-function encrypt_encryption_methods_basic($op = 'encrypt', $text = '', $key = '', $options = array()) {
+function encrypt_encryption_methods_basic($op, $text, $key, $options = array()) {
   $processed_text = '';
 
   // Caching length operations to speed up for loops.

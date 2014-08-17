@@ -17,7 +17,7 @@ $plugin = array(
  *
  * This method uses the phpseclib and AES-256.
  */
-function _encrypt_encryption_methods_phpseclib($op = 'encrypt', $text = '', $key, $options = array()) {
+function _encrypt_encryption_methods_phpseclib($op, $text, $key, $options = array()) {
   $processed_text = '';
 
   if ($path = libraries_get_path('phpseclib')) {
