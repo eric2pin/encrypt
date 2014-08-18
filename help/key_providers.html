@@ -25,3 +25,5 @@ function _mcrypt_extension_is_present() {
 </pre></dd>
 <dt>submit callback</dt>
 <dd>Optional. The name of a function that will be called when the encrypt settings form is saved. This allows plugins to perform additional actions when settings are saved. The function should take the $form and $form_state as arguments, just like most other form submit handlers. See the file key provider plugin for an example.</dd>
+<dt>static key</dt>
+<dd>Optional. A boolean value indicating if the key can be stored as a static variable, so that it only needs to be retrieved once per page request. Set this to FALSE if the key provider returns a different key based on a value that is specific to a particular item, such as a node ID or a field's machine name. Defaults to TRUE.</dd>

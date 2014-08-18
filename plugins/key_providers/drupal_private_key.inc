@@ -10,6 +10,7 @@ $plugin = array(
   'description' => t("Use Drupal's private key from the database."),
   'key callback' => 'encrypt_get_drupal_private_key',
   'settings form' => NULL,
+  'static key' => TRUE,
 );
 
 /**

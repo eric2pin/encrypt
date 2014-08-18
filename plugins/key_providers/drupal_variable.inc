@@ -11,6 +11,7 @@ $plugin = array(
   'key callback' => 'encrypt_get_encrypt_drupal_variable_key',
   'settings form' => NULL,
   'dependency callback' => '_encrypt_drupal_variable_is_present',
+  'static key' => TRUE,
 );
 
 /**

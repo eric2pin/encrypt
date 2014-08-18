@@ -150,6 +150,7 @@ function encrypt_ctools_plugin_type() {
       'dependency callback' => NULL,
       'dependency errors' => NULL,
       'settings form' => NULL,
+      'static key' => TRUE,
     ),
   );
 
@@ -409,11 +410,34 @@ function encrypt_get_key_providers($all = TRUE, $reset = FALSE) {
  *   The key.
  */
 function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
+  $keys = &drupal_static(__FUNCTION__);
+
   if (!is_array($provider)) {
     $provider = encrypt_get_key_provider($provider);
   }
-  $key_function = ctools_plugin_get_function($provider, 'key callback');
-  $key = call_user_func($key_function, $provider_settings);
+
+  // Get a hash for this combination of provider name and settings.
+  $provider_hash = md5(json_encode(array($provider['name'], $provider_settings)));
+
+  // If the key provider allows static variable storage, try to
+  // retrieve the key from the static variable.
+  if ($provider['static key'] && isset($keys[$provider_hash])) {
+    $key = $keys[$provider_hash];
+  }
+
+  // If the key was not set from static variable storage,
+  // retrieve it from the key provider.
+  if (!isset($key)) {
+    $key_function = ctools_plugin_get_function($provider, 'key callback');
+    $key = call_user_func($key_function, $provider_settings);
+
+    // If the key provider allows static variable storage, set the
+    // static variable.
+    if ($provider['static key']) {
+      $keys[$provider_hash] = $key;
+    }
+  }
+
   return $key;
 }
 

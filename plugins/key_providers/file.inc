@@ -13,6 +13,7 @@ $plugin = array(
   'key callback' => 'encrypt_get_file_key',
   'settings form' => 'encrypt_file_key_settings_form',
   'submit callback' => 'encrypt_file_key_settings_form_submit',
+  'static key' => TRUE,
 );
 
 /**
