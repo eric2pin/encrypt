@@ -20,8 +20,8 @@ $plugin = array(
 function encrypt_get_encrypt_drupal_variable_key() {
   $key = variable_get('encrypt_drupal_variable_key', NULL);
   if (empty($key)) {
-    watchdog('encrypt', "You need to set the encrypt_drupal_variable_key variable, preferably in $conf in your settings.php.", array(), WATCHDOG_EMERGENCY);
-    drupal_set_message("Encryption settings are insufficient. See your site log for more information.");
+    watchdog('encrypt', 'You need to set the encrypt_drupal_variable_key variable, preferably in $conf in your settings.php.', array(), WATCHDOG_EMERGENCY);
+    drupal_set_message("Encryption settings are insufficient. See your site log for more information.", 'error');
   }
   return $key;
 }
