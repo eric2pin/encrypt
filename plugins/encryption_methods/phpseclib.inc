@@ -13,12 +13,21 @@ $plugin = array(
 );
 
 /**
- * Callback for Encrypt implementation: Mcrypt.
+ * Callback for Encrypt implementation: phpseclib.
  *
- * This method uses the phpseclib and AES-256.
+ * This method uses the PHP Secure Communications Library and AES-256.
+ * Base64 encoding is used by default, unless disabled by setting
+ * 'base64' to FALSE in $options.
  */
 function _encrypt_encryption_methods_phpseclib($op, $text, $key, $options = array()) {
   $processed_text = '';
+
+  $disable_base64 = array_key_exists('base64', $options) && $options['base64'] == FALSE;
+
+  // If we're decrypting and base64 encoding is not disabled.
+  if ($op == 'decrypt' && !$disable_base64) {
+    $text = base64_decode($text);
+  }
 
   if ($path = libraries_get_path('phpseclib')) {
     // Include the AES file and instantiate.
@@ -28,6 +37,11 @@ function _encrypt_encryption_methods_phpseclib($op, $text, $key, $options = arra
     $aes->setKey($key);
 
     $processed_text = $aes->{$op}($text);
+  }
+
+  // If we're encrypting and base64 encoding is not disabled.
+  if ($op == 'encrypt' && !$disable_base64) {
+    $processed_text = base64_encode($processed_text);
   }
 
   return trim($processed_text);
