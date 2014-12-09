@@ -71,6 +71,7 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   else {
     $config = encrypt_get_default_config($config);
   }
+  $options['config'] = $config;
 
   // If the method was not specified, use the method
   // from the configuration.
