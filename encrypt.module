@@ -196,6 +196,33 @@ function encrypt_get_configs($reset = FALSE) {
 }
 
 /**
+ * Get all configurations as options.
+ *
+ * Useful for retrieving a list of configurations to be used as
+ * #options in form elements such as select, checkboxes, and radios.
+ *
+ * @param bool $reset
+ *   A flag to force the configurations to be retrieved from the database.
+ *
+ * @return array
+ *   An array of key-value pairs. The key is the configuration's machine-
+ *   readable name and the value is its human-friendly label.
+ */
+function encrypt_get_configs_as_options($reset = FALSE) {
+  static $options = array();
+
+  if (!$options || $reset) {
+    $configs = encrypt_get_configs($reset);
+
+    foreach ($configs as $key => $config) {
+      $options[$key] = $config['label'];
+    }
+  }
+
+  return $options;
+}
+
+/**
  * Get one configuration.
  *
  * @param bool $name
@@ -631,4 +658,21 @@ function _encrypt_display_update_message() {
   if (user_access('administer content')) {
     drupal_set_message(t('Encrypt requires a database schema update. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'update.php')), 'error', FALSE);
   }
+}
+
+/**
+ * Implements hook_features_api().
+ *
+ * Define the components that we want to make exportable, in this case
+ * Encrypt configurations.
+ */
+function encrypt_features_api() {
+  return array(
+    'encrypt_config' => array(
+      'name' => 'Encrypt configurations',
+      'file' => drupal_get_path('module', 'encrypt') . '/includes/encrypt.features.inc',
+      'default_hook' => 'encrypt_default_configs',
+      'feature_source' => TRUE,
+    ),
+  );
 }
