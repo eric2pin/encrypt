@@ -308,6 +308,56 @@ function encrypt_get_default_config($reset = FALSE) {
 }
 
 /**
+ * Save a configuration.
+ *
+ * @param array $fields
+ *   The fields of the configuration to save.
+ * @param bool $messages
+ *   TRUE if messages should be displayed.
+ */
+function encrypt_save_config($fields, $messages = TRUE) {
+  // Serialize any field that is an array.
+  foreach ($fields as $key => $field) {
+    if (is_array($field)) {
+      $fields[$key] = serialize($field);
+    }
+  }
+
+  // If the created field is empty, set it to the request time.
+  if (empty($fields['created'])) {
+    $fields['created'] = REQUEST_TIME;
+  }
+
+  // If the changed field is empty, set it to the request time.
+  if (empty($fields['changed'])) {
+    $fields['changed'] = REQUEST_TIME;
+  }
+
+  // Save the configuration.
+  $merge_status = db_merge('encrypt_config')
+    ->key(array('name' => $fields['name']))
+    ->fields($fields)
+    ->execute();
+
+  // Display message and log to watchdog.
+  if ($messages) {
+    $t_args = array('%label' => $fields['label']);
+
+    switch ($merge_status) {
+      case MergeQuery::STATUS_INSERT:
+        drupal_set_message(t('The configuration %label has been added.', $t_args));
+        watchdog('encrypt', 'Added encryption configuration %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), ENCRYPT_MENU_PATH . '/list'));
+        break;
+
+      case MergeQuery::STATUS_UPDATE:
+        drupal_set_message(t('The configuration %label has been updated.', $t_args));
+        watchdog('encrypt', 'Updated encryption configuration %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), ENCRYPT_MENU_PATH . '/list'));
+        break;
+    }
+  }
+}
+
+/**
  * Fetch metadata on a specific encryption method plugin.
  *
  * @param mixed $method
