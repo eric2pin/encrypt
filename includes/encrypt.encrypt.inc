@@ -71,7 +71,6 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   else {
     $config = encrypt_get_default_config($config);
   }
-  $options['config'] = $config;
 
   // If the method was not specified, use the method
   // from the configuration.
@@ -108,7 +107,7 @@ function _encrypt_decrypt($op = 'encrypt', $text = '', $options = array(), $meth
   // Call callback function for encryption and decryption.
   $encryption_method = encrypt_get_encryption_method($method);
   $function = ctools_plugin_get_function($encryption_method, 'encrypt callback');
-  $processed = call_user_func($function, $op, $text, $key, $options);
+  $processed = call_user_func($function, $op, $text, $key, $options, $config);
 
   // Check for returned value.
   if (!empty($processed) && $op == 'encrypt') {
