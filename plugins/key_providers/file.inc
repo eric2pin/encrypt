@@ -107,7 +107,7 @@ function encrypt_file_key_settings_form_submit($form, $form_state) {
 
   // Create a default key.
   $open_file = fopen($file, 'wb');
-  $new_key = md5(uniqid(mt_rand(0, mt_rand()), TRUE)) . md5(uniqid(mt_rand(0, mt_rand()), TRUE));
+  $new_key = md5(drupal_random_bytes(32));
   fwrite($open_file, $new_key);
   fclose($open_file);
 
