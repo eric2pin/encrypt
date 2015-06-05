@@ -7,14 +7,21 @@
 
 define('ENCRYPT_FILE_NAME', 'encrypt_key.key');
 
-$plugin = array(
-  'title' => t('File'),
-  'description' => t('Use a file to store the encryption key.'),
-  'key callback' => 'encrypt_get_file_key',
-  'settings form' => 'encrypt_file_key_settings_form',
-  'submit callback' => 'encrypt_file_key_settings_form_submit',
-  'static key' => TRUE,
-);
+$plugin = encrypt_file_encrypt_key_providers();
+
+/**
+ * Implements MODULE_FILENAME_encrypt_key_providers().
+ */
+function encrypt_file_encrypt_key_providers() {
+  return array(
+    'title' => t('File'),
+    'description' => t('Use a file to store the encryption key.'),
+    'key callback' => 'encrypt_get_file_key',
+    'settings form' => 'encrypt_file_key_settings_form',
+    'submit callback' => 'encrypt_file_key_settings_form_submit',
+    'static key' => TRUE,
+  );
+}
 
 /**
  * Callback method to return the encryption key from a file.
