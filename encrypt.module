@@ -483,10 +483,14 @@ function encrypt_get_key_providers($all = TRUE, $reset = FALSE) {
  *   provider (from encrypt_get_key_provider() or the name of the provider. If
  *   NULL, it assumes the default key provider.
  *
+ * @param array $config
+ * The selected configuration.
+ *
  * @return string
  *   The key.
  */
-function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings = array()) {
+function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings = array(), $config = array()) {
+
   $keys = &drupal_static(__FUNCTION__);
 
   if (!is_array($provider)) {
@@ -506,7 +510,7 @@ function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings 
   // retrieve it from the key provider.
   if (!isset($key)) {
     $key_function = ctools_plugin_get_function($provider, 'key callback');
-    $key = call_user_func($key_function, $provider_settings);
+    $key = call_user_func($key_function, $provider_settings, $config);
 
     // If the key provider allows static variable storage, set the
     // static variable.
