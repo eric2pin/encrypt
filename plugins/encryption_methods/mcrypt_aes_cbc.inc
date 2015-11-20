@@ -106,7 +106,7 @@ function _encrypt_encryption_methods_mcrypt_aes_cbc($op, $text, $key, $options =
   }
   else {
     // Create a random IV.
-    $iv = mcrypt_create_iv($iv_size, MCRYPT_DEV_RANDOM);
+    $iv = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM);
 
     // Generate a random 32-byte salt, using half for encryption and
     // half for authentication.
