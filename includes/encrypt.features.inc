@@ -6,8 +6,8 @@
  */
 
 /**
- * Implements hook_features_export_options().
- */
+  * Implements hook_features_export_options().
+  */
 function encrypt_config_features_export_options() {
   return encrypt_get_configs_as_options(TRUE);
 }
@@ -37,7 +37,7 @@ function encrypt_config_features_export_render($module_name, $data, $export = NU
   foreach ($data as $name) {
     $config = encrypt_config_load($name);
     $config_identifier = features_var_export($name);
-    $config_export = features_var_export($config , '  ');
+    $config_export = features_var_export($config, '  ');
     $code[] = "  // Exported configuration: {$name}.";
     $code[] = "  \$configs[{$config_identifier}] = {$config_export};";
     $code[] = "";

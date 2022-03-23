@@ -8,8 +8,11 @@
 /**
  * Implements hook_ctools_plugin_directory().
  */
+/*
+BACKDROP CHANGE:
 function encrypt_test_ctools_plugin_directory($module, $plugin) {
   if ($module == 'encrypt') {
     return 'plugins/' . $plugin;
   }
 }
+*/

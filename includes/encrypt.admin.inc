@@ -14,7 +14,7 @@ function encrypt_configs_list() {
   $configs = encrypt_get_configs();
   $methods = encrypt_get_encryption_methods();
   $providers = encrypt_get_key_providers();
-  $default_config = variable_get('encrypt_default_config', NULL);
+  $default_config = config_get('encrypt.settings', 'encrypt_default_config');
 
   $header = array(
     t('Name'),
@@ -22,7 +22,10 @@ function encrypt_configs_list() {
     t('Key Provider'),
     t('Created'),
     t('Status'),
-    array('data' => t('Operations'), 'colspan' => '3'),
+    array(
+      'data' => t('Operations'),
+      'colspan' => '3',
+    ),
   );
   $rows = array();
 
@@ -56,7 +59,7 @@ function encrypt_configs_list() {
 
     // Set the status column.
     $status = array();
-    $status[] = ($config['enabled']) ? t('Enabled') : t('Disabled');
+    $status[] = ($config['enabled'])?t('Enabled') : t('Disabled');
     if ($default_config == $config['name']) {
       $status[] = t('Default');
     }
@@ -101,7 +104,7 @@ function encrypt_configs_list() {
  * @ingroup forms
  */
 function encrypt_config_form($form, &$form_state, $config = NULL) {
-  $default_config = variable_get('encrypt_default_config', NULL);
+  $default_config = config_get('encrypt.settings', 'encrypt_default_config');
 
   // Clear the plugin cache on the first page load (but not on AJAX refreshes).
   if (!isset($form_state['values'])) {
@@ -152,7 +155,7 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
 
   $form['#attached'] = array(
     'css' => array(
-      drupal_get_path('module', 'encrypt') . '/encrypt.css',
+      backdrop_get_path('module', 'encrypt') . '/encrypt.css',
     ),
   );
 
@@ -185,7 +188,7 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
   $form['settings'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
-      'js' => array(drupal_get_path('module', 'encrypt') . '/js/encrypt_admin.js'),
+      'js' => array(backdrop_get_path('module', 'encrypt') . '/js/encrypt_admin.js'),
     ),
   );
 
@@ -245,8 +248,9 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
     $method = NULL;
   }
 
-  if ($method) {
-    if ($method_settings_form = ctools_plugin_get_function($methods[$method], 'settings form')) {
+  if ($method) {    
+    //BACKDROP CHANGE: if ($method_settings_form = ctools_plugin_get_function($methods[$method], 'settings form')) {
+    if ($method_settings_form = encrypt_get_plugin_function($methods[$method], 'settings form')) {
       $form['method_settings']['method_settings_wrapper']['method_settings'] = array(
         '#type' => 'fieldset',
         '#title' => t('Additional Encryption Method Settings'),
@@ -295,8 +299,9 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
   }
 
   if ($provider) {
-    if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
-      $form['provider_settings']['key_settings_wrapper']['key_settings'] = array(
+    // BACKDROP CHANGE: if ($provider_settings_form = ctools_plugin_get_function($providers[$provider], 'settings form')) {
+      if ($provider_settings_form = encrypt_get_plugin_function($providers[$provider], 'settings form')) {
+        $form['provider_settings']['key_settings_wrapper']['key_settings'] = array(
         '#type' => 'fieldset',
         '#title' => t('Additional Key Provider Settings'),
       );
@@ -304,7 +309,6 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
       $form['provider_settings']['key_settings_wrapper']['key_settings']['encrypt_key_providers_' . $provider . '_settings'] = array('#tree' => TRUE) + call_user_func($provider_settings_form, $config['provider_settings']);
     }
   }
-
   $form['created'] = array(
     '#type' => 'value',
     '#value' => $config['created'],
@@ -335,7 +339,7 @@ function encrypt_config_form($form, &$form_state, $config = NULL) {
  */
 function encrypt_config_form_validate($form, &$form_state) {
   // Don't allow the default configuration to be disabled.
-  $default_config = variable_get('encrypt_default_config', NULL);
+  $default_config = config_get('encrypt.settings', 'encrypt_default_config');
 
   if ($default_config == $form_state['values']['name'] && !$form_state['values']['enabled']) {
     form_set_error('general_settings][enabled', t('The default configuration must be enabled.'));
@@ -350,7 +354,8 @@ function encrypt_config_form_submit($form, &$form_state) {
   $key_provider = encrypt_get_key_provider($form_state['values']['encrypt_key_provider']);
 
   foreach (array($method, $key_provider) as $plugin) {
-    if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
+    //BACKDROP CHANGE: if ($submit_callback = ctools_plugin_get_function($plugin, 'submit callback')) {
+    if ($submit_callback = encrypt_get_plugin_function($plugin, 'submit callback')) {
       // Create a copy so that the plugin callback cannot change the
       // form state.
       $form_state_copy = $form_state;
@@ -402,15 +407,21 @@ function encrypt_config_form_delete_submit($form, &$form_state) {
  * @ingroup forms
  */
 function encrypt_config_delete_confirm($form, &$form_state, $config) {
-  $default_config = variable_get('encrypt_default_config', NULL);
+  $default_config = config_get('encrypt.settings', 'encrypt_default_config');
 
   if ($default_config == $config['name']) {
-    drupal_set_message(t('The default configuration cannot be deleted.'), 'error');
-    drupal_goto(ENCRYPT_MENU_PATH);
+    backdrop_set_message(t('The default configuration cannot be deleted.'), 'error');
+    backdrop_goto(ENCRYPT_MENU_PATH);
   }
 
-  $form['name'] = array('#type' => 'value', '#value' => $config['name']);
-  $form['label'] = array('#type' => 'value', '#value' => $config['label']);
+  $form['name'] = array(
+    '#type' => 'value',
+    '#value' => $config['name'],
+  );
+  $form['label'] = array(
+    '#type' => 'value',
+    '#value' => $config['label'],
+  );
 
   $message = t('Are you sure you want to delete the configuration %label?', array('%label' => $config['label']));
   $caption = '<p>' . t('This action cannot be undone.') . '</p>';
@@ -429,7 +440,7 @@ function encrypt_config_delete_confirm_submit($form, &$form_state) {
     ->execute();
 
   $t_args = array('%label' => $form_state['values']['label']);
-  drupal_set_message(t('The configuration %label has been deleted.', $t_args));
+  backdrop_set_message(t('The configuration %label has been deleted.', $t_args));
   watchdog('encrypt', 'Deleted encryption configuration %label.', $t_args, WATCHDOG_NOTICE);
 
   $form_state['redirect'] = ENCRYPT_MENU_PATH;
@@ -439,9 +450,9 @@ function encrypt_config_delete_confirm_submit($form, &$form_state) {
  * Menu callback to make a configuration the default.
  */
 function encrypt_config_make_default($config) {
-  variable_set('encrypt_default_config', $config['name']);
+  config_set('encrypt.settings', 'encrypt_default_config', $config['name']);
 
-  $default_config = variable_get('encrypt_default_config', NULL);
+  $default_config = config_get('encrypt.settings', 'encrypt_default_config');
   $t_args = array('%label' => $config['label']);
   if ($default_config == $config['name']) {
     // If the configuration is not enabled and it's the new default, enable it.
@@ -450,19 +461,19 @@ function encrypt_config_make_default($config) {
         ->fields(array('enabled' => 1))
         ->condition('name', $config['name'])
         ->execute();
-      drupal_set_message(t('The configuration %label has been enabled.', $t_args));
+      backdrop_set_message(t('The configuration %label has been enabled.', $t_args));
       watchdog('node', 'Enabled encryption configuration %label.', $t_args, WATCHDOG_NOTICE);
     }
 
-    drupal_set_message(t('The configuration %label has been made the default.', $t_args));
+    backdrop_set_message(t('The configuration %label has been made the default.', $t_args));
     watchdog('encrypt', 'Made encryption configuration %label the default.', $t_args, WATCHDOG_NOTICE);
   }
   else {
-    drupal_set_message(t('The configuration %label could not be made the default.', $t_args), 'error');
+    backdrop_set_message(t('The configuration %label could not be made the default.', $t_args), 'error');
     watchdog('encrypt', 'Error when trying to make encryption configuration %label the default.', $t_args, WATCHDOG_ERROR);
   }
 
-  drupal_goto(ENCRYPT_MENU_PATH);
+  backdrop_goto(ENCRYPT_MENU_PATH);
 }
 
 /**

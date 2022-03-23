@@ -35,7 +35,7 @@ function _encrypt_encryption_methods_phpseclib($op, $text, $key, $options = arra
   if ($op == 'decrypt' && !$disable_base64) {
     $text = base64_decode($text);
   }
-
+  /*
   if ($path = libraries_get_path('phpseclib')) {
     // Include the AES file and instantiate.
     require_once $path . '/Crypt/AES.php';
@@ -45,7 +45,7 @@ function _encrypt_encryption_methods_phpseclib($op, $text, $key, $options = arra
 
     $processed_text = $aes->{$op}($text);
   }
-
+*/
   // If we're encrypting and base64 encoding is not disabled.
   if ($op == 'encrypt' && !$disable_base64) {
     $processed_text = base64_encode($processed_text);

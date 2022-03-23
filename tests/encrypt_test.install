@@ -1,0 +1,25 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the encrypt_test module.
+ *
+ */
+
+
+/**
+ * Migrate encrypt_test variables to config.
+ */
+function encrypt_test_update_1000() {
+  $config = config('encrypt_test.settings');
+  $config->set('encrypt_test_trigger_unmet_deps', update_variable_get('encrypt_test_trigger_unmet_deps', TRUE));
+  $config->save();
+
+  update_variable_del('encrypt_test_trigger_unmet_deps');
+}
+
+/**
+ * Implements hook_install().
+ */
+function encrypt_test_install() {
+  // Dynamically generated variable data was detected.
+}

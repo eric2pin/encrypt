@@ -2,9 +2,9 @@
 
 /**
  * @file
- * Main Encrypt Drupal File
+ * Main Encrypt Backdrop File
  *
- * This file holds the main Drupal hook functions,
+ * This file holds the main Backdrop hook functions,
  * and API functions.
  *
  * @ingroup encrypt
@@ -13,7 +13,7 @@
 /**
  * @defgroup encrypt Encrypt: Provides an API for two-way encryption
  *
- * Provides an API for two-way encryption.  Drupal has no native way
+ * Provides an API for two-way encryption.  Backdrop has no native way
  * to do two-way encryption.  PHP's ability to do two-way encryption
  * is a little more involved than most people care to get into.  This
  * module provides an easy way to encrypt() and decrypt().
@@ -27,7 +27,7 @@ define('ENCRYPT_MENU_PATH', 'admin/config/system/encrypt');
 function encrypt_help($path, $arg) {
   switch ($path) {
     case 'admin/help#encrypt':
-      $output = '<p>' . t("The encrypt module Provides an API for two-way encryption. Drupal has no native way to do two-way encryption. PHP's ability to do two-way encryption is a little more involved than most people care to get into.  This module provides an easy way to encrypt() and decrypt().") . '</p>';
+      $output = '<p>' . t("The encrypt module Provides an API for two-way encryption. Backdrop has no native way to do two-way encryption. PHP's ability to do two-way encryption is a little more involved than most people care to get into.  This module provides an easy way to encrypt() and decrypt().") . '</p>';
 
       if (!function_exists('mcrypt_encrypt')) {
         $output .= '<p>' . t('Mcrypt is currently not installed or configured properly on your server. If you would like to use the "Mcrypt AES (CBC Mode)" method for encryption, follow the instructions for <a href="http://www.php.net/manual/en/mcrypt.setup.php">installing Mcrypt</a>.') . '</p>';
@@ -58,7 +58,7 @@ function encrypt_menu() {
   );
   $items[ENCRYPT_MENU_PATH . '/add'] = array(
     'title' => 'Add configuration',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('encrypt_config_form'),
     'access arguments' => array('administer encrypt'),
     'file' => 'includes/encrypt.admin.inc',
@@ -68,7 +68,7 @@ function encrypt_menu() {
     'title' => 'Edit encryption configuration',
     'title callback' => 'encrypt_config_edit_title',
     'title arguments' => array(5),
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('encrypt_config_form', 5),
     'access arguments' => array('administer encrypt'),
     'file' => 'includes/encrypt.admin.inc',
@@ -81,7 +81,7 @@ function encrypt_menu() {
   );
   $items[ENCRYPT_MENU_PATH . '/delete/%encrypt_config'] = array(
     'title' => 'Delete encryption configuration',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('encrypt_config_delete_confirm', 5),
     'access arguments' => array('administer encrypt'),
     'file' => 'includes/encrypt.admin.inc',
@@ -119,10 +119,128 @@ function encrypt_theme() {
 }
 
 /**
+ * Defines encrypt_plugin_info() for Backdrop CMS style plugin loading
+ */
+function encrypt_encrypt_plugin_info() {
+  $plugins = array();
+
+  $plugins['encryption_methods'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_encrypt_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'encrypt callback' => NULL,
+      'dependency callback' => NULL,
+      'dependency errors' => NULL,
+      'settings form' => NULL,
+      'submit callback' => NULL,
+      'deprecated' => FALSE,
+    ),
+  );
+  $plugins['key_providers'] = array(
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'process' => '_encrypt_plugin_process',
+    'defaults' => array(
+      'title' => '',
+      'description' => '',
+      'key callback' => NULL,
+      'dependency callback' => NULL,
+      'dependency errors' => NULL,
+      'settings form' => NULL,
+      'static key' => TRUE,
+      'submit callback' => NULL,
+      'deprecated' => FALSE,
+    ),
+  );
+
+  return $plugins;
+}
+
+/**
+ * Implements hook_get_encrypt_plugins()
+ */
+function encrypt_get_encrypt_plugins($type) {
+  $includes = array();   
+  $modulePath = backdrop_get_path('module', 'encrypt');
+  $includes = file_scan_directory($modulePath .'/plugins/'. $type, '/.*\.inc$/');
+  return $includes;
+}
+
+/**
+ * Get specified encrypt plugins
+ *
+ * @param string $type
+ *   The type of plugin, the plugins subdirectory to search
+ * 
+ * @param string $id
+ *   The ID of plugin, defaults to FALSE and returns all
+ */
+function encrypt_get_plugins($type, $id = FALSE) {
+  $defaults = encrypt_encrypt_plugin_info();
+  if (isset($defaults[$type])) {
+    $default = $defaults[$type]['defaults'];
+  } else {
+    $default = array();
+  }
+  
+  $includes = module_invoke_all('get_encrypt_plugins', $type);
+  $plugins = array();        
+
+  foreach ($includes as $include) {
+    
+    // THIS IS THE PROBLEM: CALLBACK NOT CALLED
+    require_once($include->uri);    
+    
+    $pluginCallback = "encrypt_". $include->name ."_encrypt_". $type;
+    if (function_exists($pluginCallback)) {
+      $plugin = $pluginCallback();
+    }    
+    
+    $attributes = array(
+      'module' => 'encrypt',
+      'name' => $include->name,
+      'path' => $include->uri,
+      'file' => $include->filename,
+      'plugin module' => 'encrypt',
+      'plugin type' => $type,
+    );
+    $plugins[$include->name] = array_merge($default, $attributes, $plugin);
+    
+
+    //$plugins[] = 
+    /*
+    module_load_include('inc', 'encrypt', explode('.inc', 'plugins' . explode('plugins', $include->uri)[1])[0]);                
+    $methodName = 'encrypt_'. $include->name .'_encrypt_encryption_methods';
+    $methods[$include->name] = $methodName();
+    */
+  }
+  
+  if ($id && isset($plugins[$id])) {
+    return $plugins[$id];
+  }
+  return $plugins;
+  //ctools_get_plugins('encrypt', 'encryption_methods', $method);
+}
+
+function encrypt_get_plugin_function($plugin, $callback) {
+  if (isset($plugin[$callback])) {
+    if (function_exists($plugin[$callback])) {
+      return $plugin[$callback];
+    }
+  }
+  return FALSE;
+}
+
+
+/**
  * Implements hook_ctools_plugin_type().
  *
  * Tell ctools about our plugin types.
  */
+/*
 function encrypt_ctools_plugin_type() {
   $plugins = array();
 
@@ -160,6 +278,7 @@ function encrypt_ctools_plugin_type() {
 
   return $plugins;
 }
+*/
 
 /**
  * Get all configurations.
@@ -303,6 +422,17 @@ function encrypt_get_enabled_configs_as_options($reset = FALSE) {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function encrypt_config_info() {
+  $prefixes['encrypt.settings'] = array(
+    'label' => t('Encrypt settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Get the default configuration.
  *
  * @param bool $reset
@@ -312,18 +442,20 @@ function encrypt_get_enabled_configs_as_options($reset = FALSE) {
  *   An array with details for the default configuration.
  */
 function encrypt_get_default_config($reset = FALSE) {
+  $config = config('encrypt.settings');
   static $default_config = array();
 
   if (!$default_config || $reset) {
-    $default_config = variable_get('encrypt_default_config', NULL);
+    $default_config = $config->get('encrypt_default_config');
     $default_config = encrypt_get_config($default_config);
 
     // For backward compatibility.
     if (empty($default_config)) {
-      $method = variable_get('encrypt_encryption_method', 'default');
-      $provider = variable_get('encrypt_key_provider', 'drupal_private_key');
+      $method = $config->get('encrypt_encryption_method');
+      $provider = $config->get('encrypt_key_provider');
 
       $settings_variable = 'encrypt_key_providers_' . $provider . '_settings';
+      // TODO This variable was probably removed in Backdrop without replacement.
       $provider_settings = variable_get($settings_variable, array());
 
       $default_config = array(
@@ -376,12 +508,12 @@ function encrypt_save_config($fields, $messages = TRUE) {
 
     switch ($merge_status) {
       case MergeQuery::STATUS_INSERT:
-        drupal_set_message(t('The configuration %label has been added.', $t_args));
+        backdrop_set_message(t('The configuration %label has been added.', $t_args));
         watchdog('encrypt', 'Added encryption configuration %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), ENCRYPT_MENU_PATH . '/list'));
         break;
 
       case MergeQuery::STATUS_UPDATE:
-        drupal_set_message(t('The configuration %label has been updated.', $t_args));
+        backdrop_set_message(t('The configuration %label has been updated.', $t_args));
         watchdog('encrypt', 'Updated encryption configuration %label.', $t_args, WATCHDOG_NOTICE, l(t('view'), ENCRYPT_MENU_PATH . '/list'));
         break;
     }
@@ -405,8 +537,10 @@ function encrypt_get_encryption_method($method = NULL) {
     $config = encrypt_get_default_config();
     $method = $config['method'];
   }
-  ctools_include('plugins');
-  return ctools_get_plugins('encrypt', 'encryption_methods', $method);
+  $return = encrypt_get_plugins("encryption_methods", $method);
+  //ctools_include('plugins');
+  // BACKDROP CHANGE:
+  return $return; //encrypt_get_plugins("encryption_methods", $method); //ctools_get_plugins('encrypt', 'encryption_methods', $method);
 }
 
 /**
@@ -428,8 +562,29 @@ function encrypt_get_encryption_methods($all = TRUE, $reset = FALSE) {
     _encrypt_clear_plugin_cache('encryption_methods');
   }
 
-  ctools_include('plugins');
-  $methods = ctools_get_plugins('encrypt', 'encryption_methods');
+  // BACKDROP CHANGE: 
+  $methods = encrypt_get_plugins("encryption_methods");
+
+  //ctools_include('plugins');
+  /*
+  $encryptPath = backdrop_get_path('module', 'encrypt');
+  $includes = file_scan_directory($encryptPath .'/plugins/encryption_methods', '/.*\.inc$/');
+  $methods = array();
+
+  foreach ($includes as $include) {
+    module_load_include('inc', 'encrypt', explode('.inc', 'plugins' . explode('plugins', $include->uri)[1])[0]);                
+    $methodName = 'encrypt_'. $include->name .'_encrypt_encryption_methods';
+    $methods[$include->name] = $methodName();
+  }
+*/
+
+  //$methods = module_invoke_all('encrypt_plugin_info'); //ctools_get_plugins('encrypt', 'encryption_methods');
+  //$file = module_load_include('inc', 'encrypt', 'plugins/encryption_methods/mcrypt_aes_cbc');
+  
+  
+  //$methods[] = encrypt_mcrypt_aes_cbc_encrypt_encryption_methods();
+
+
 
   return $all ? $methods : array_filter($methods, '_encrypt_plugin_is_valid');
 }
@@ -451,8 +606,8 @@ function encrypt_get_key_provider($provider = NULL) {
     $config = encrypt_get_default_config();
     $provider = $config['provider'];
   }
-  ctools_include('plugins');
-  return ctools_get_plugins('encrypt', 'key_providers', $provider);
+  //ctools_include('plugins');
+  return encrypt_get_plugins("key_providers", $provider); //ctools_get_plugins('encrypt', 'key_providers', $provider);
 }
 
 /**
@@ -473,9 +628,9 @@ function encrypt_get_key_providers($all = TRUE, $reset = FALSE) {
     _encrypt_clear_plugin_cache('key_providers');
   }
 
-  ctools_include('plugins');
-  $providers = ctools_get_plugins('encrypt', 'key_providers');
-
+  //ctools_include('plugins');
+  // BACKDROP CHANGE:
+  $providers = encrypt_get_plugins("key_providers"); //ctools_get_plugins('encrypt', 'key_providers');
   return $all ? $providers : array_filter($providers, '_encrypt_plugin_is_valid');
 }
 
@@ -495,8 +650,7 @@ function encrypt_get_key_providers($all = TRUE, $reset = FALSE) {
  */
 function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings = array(), $config = array()) {
 
-  $keys = &drupal_static(__FUNCTION__);
-
+  $keys = &backdrop_static(__FUNCTION__);
   if (!is_array($provider)) {
     $provider = encrypt_get_key_provider($provider);
   }
@@ -513,7 +667,8 @@ function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings 
   // If the key was not set from static variable storage,
   // retrieve it from the key provider.
   if (!isset($key)) {
-    $key_function = ctools_plugin_get_function($provider, 'key callback');
+    // BACKDROP CHANGE: $key_function = ctools_plugin_get_function($provider, 'key callback');
+    $key_function = encrypt_get_plugin_function($provider, 'key callback');
     $key = call_user_func($key_function, $provider_settings, $config);
 
     // If the key provider allows static variable storage, set the
@@ -531,14 +686,15 @@ function encrypt_get_key_from_key_provider($provider = NULL, $provider_settings 
  */
 function _encrypt_plugin_process(&$plugin, $info) {
   // Calculate dependencies and attach any errors.
-  if ($plugin['dependency callback'] && $dep_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
+  // BACKDROP CHANGE: if ($plugin['dependency callback'] && $dep_function = ctools_plugin_get_function($plugin, 'dependency callback')) {
+  if ($plugin['dependency callback'] && $dep_function = encrypt_get_plugin_function($plugin, 'dependency callback')) {
     $plugin['dependency errors'] = call_user_func($dep_function);
   }
 }
 
 /**
- * Helper function to determine if a plugin has unmet dependencies. 
- * 
+ * Helper function to determine if a plugin has unmet dependencies.
+ *
  * Most helpful in conjunction with array_filter().
  *
  * @param array $plugin
@@ -625,11 +781,14 @@ function decrypt($text = '', $options = array(), $method = NULL, $key_provider =
  *
  * Tell ctools about our plugins.
  */
+/*
+BACKDROP CHANGE:
 function encrypt_ctools_plugin_directory($module, $plugin) {
   if ($module == 'encrypt') {
     return 'plugins/' . $plugin;
   }
 }
+*/
 
 /**
  * Title callback for the configuration edit page.
@@ -664,7 +823,7 @@ function encrypt_config_load($name) {
  */
 function _encrypt_display_update_message() {
   if (user_access('administer content')) {
-    drupal_set_message(t('Encrypt requires a database schema update. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'update.php')), 'error', FALSE);
+    backdrop_set_message(t('Encrypt requires a database schema update. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'update.php')), 'error', FALSE);
   }
 }
 
@@ -678,9 +837,17 @@ function encrypt_features_api() {
   return array(
     'encrypt_config' => array(
       'name' => 'Encrypt configurations',
-      'file' => drupal_get_path('module', 'encrypt') . '/includes/encrypt.features.inc',
+      'file' => backdrop_get_path('module', 'encrypt') . '/includes/encrypt.features.inc',
       'default_hook' => 'encrypt_default_configs',
       'feature_source' => TRUE,
     ),
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function encrypt_autoload_info() {
+  return array(
   );
 }

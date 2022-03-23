@@ -96,11 +96,11 @@ class EncryptPortability extends DrupalWebTestCase {
   function testMethodAndKeyProviderPortability() {
     // Generate some text to encrypt and encrypt it.
     $text = $this->randomName(10);
-    $encrypted = encrypt($text, array(), 'mcrypt_aes_cbc', 'drupal_variable');
+    $encrypted = encrypt($text, array(), 'mcrypt_aes_cbc', 'backdrop_variable');
     $encrypted_array = unserialize($encrypted);
 
     $this->assertEqual($encrypted_array['method'], 'mcrypt_aes_cbc', t('Encryption method is stored with an encrypted value.'));
-    $this->assertEqual($encrypted_array['key_provider'], 'drupal_variable', t('Key provider is stored with an encrypted value.'));
+    $this->assertEqual($encrypted_array['key_provider'], 'backdrop_variable', t('Key provider is stored with an encrypted value.'));
   }
 
   /**
@@ -109,7 +109,7 @@ class EncryptPortability extends DrupalWebTestCase {
   function testDecryptingRandomValue() {
     // Generate some text and encrypt it.
     $text = $this->randomName(10);
-    $encrypted = encrypt($text, array(), 'mcrypt_aes_cbc', 'drupal_variable');
+    $encrypted = encrypt($text, array(), 'mcrypt_aes_cbc', 'backdrop_variable');
     $encrypted_array = unserialize($encrypted);
 
     // First, just check to see that the value was actually encrypted.
@@ -256,7 +256,7 @@ class EncryptConfigTest extends DrupalWebTestCase {
     $fields['description'] = t('This is the original description.');
     $fields['enabled'] = FALSE;
     $fields['encrypt_encryption_method'] = 'mcrypt_aes_cbc';
-    $fields['encrypt_key_provider'] = 'drupal_variable';
+    $fields['encrypt_key_provider'] = 'backdrop_variable';
     $this->drupalPost('admin/config/system/encrypt/add', $fields, t('Save configuration'));
     $this->assertText(t('The configuration @label has been added.', array('@label' => $fields['label'])));
 

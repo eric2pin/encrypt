@@ -42,9 +42,9 @@ function _encrypt_encryption_methods_mcrypt_aes_cbc($op, $text, $key, $options =
   // If the key is not the right size, report an error.
   if (empty($key) || !in_array($key_size, $allowed_key_sizes)) {
     $t_args = array(
-      '@action' => ($op == 'decrypt') ? t('Decryption') : t('Encryption'),
+      '@action' => ($op == 'decrypt')?t('Decryption') : t('Encryption'),
     );
-    drupal_set_message(t('@action failed because the key is not the right size.', $t_args), 'error');
+    backdrop_set_message(t('@action failed because the key is not the right size.', $t_args), 'error');
     watchdog('encrypt', '@action failed because the key is not the right size.', $t_args, WATCHDOG_CRITICAL);
     throw new Exception(t('@action failed because the key is not the right size.', $t_args));
   }
@@ -74,7 +74,7 @@ function _encrypt_encryption_methods_mcrypt_aes_cbc($op, $text, $key, $options =
 
     // If the HMAC cannot be validated, throw an exception.
     if ($calculated_hmac != $hmac) {
-      drupal_set_message(t('Decryption failed because the HMAC could not be validated.'), 'error');
+      backdrop_set_message(t('Decryption failed because the HMAC could not be validated.'), 'error');
       watchdog('encrypt', 'Decryption failed because the HMAC could not be validated.', array(), WATCHDOG_CRITICAL);
       throw new Exception(t('Decryption failed because the HMAC could not be validated.'));
     }
@@ -110,7 +110,7 @@ function _encrypt_encryption_methods_mcrypt_aes_cbc($op, $text, $key, $options =
 
     // Generate a random 32-byte salt, using half for encryption and
     // half for authentication.
-    $salt = drupal_random_bytes($salt_size);
+    $salt = backdrop_random_bytes($salt_size);
     $esalt = substr($salt, 0, strlen($salt) / 2);
     $asalt = substr($salt, strlen($salt) / 2);
 

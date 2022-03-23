@@ -1,0 +1,6 @@
+{
+    "_config_name": "encrypt.settings",
+    "encrypt_key_provider": "encrypt_backdrop_variable_key",
+    "encrypt_default_method": "none",
+    "encrypt_encryption_method": "default"
+}
